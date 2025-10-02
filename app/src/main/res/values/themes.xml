@@ -1,0 +1,27 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- 透明窗口 + 无系统标题栏 -->
+    <style name="Base.Theme.IwaraAndroid" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- 窗口背景透明 -->
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowFrame">@null</item>
+
+        <!-- 状态栏/导航栏颜色由代码控制，这里先置空 -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+
+        <!-- 让系统根据背景亮度自动反转图标颜色（Material3 支持） -->
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
+    </style>
+
+    <style name="Theme.IwaraAndroid" parent="Base.Theme.IwaraAndroid" />
+
+
+
+    <style name="ShapeAppearance.Drawer.White" parent="">
+        <!-- 四个角全部 0dp，即直角 -->
+        <item name="cornerSize">0dp</item>
+    </style>
+
+</resources>

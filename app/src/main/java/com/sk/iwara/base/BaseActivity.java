@@ -1,0 +1,179 @@
+package com.sk.iwara.base;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewbinding.ViewBinding;
+
+import com.sk.iwara.R;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
+/**
+ * 泛型 BaseActivity：
+ * 1. 自动反射创建 ViewBinding
+ * 2. 提供沉浸式、软键盘、权限、加载框、Toast 等常用工具
+ * 3. 子类仅需实现 init()
+ *
+ * @param <VB> 对应的 ViewBinding 类型
+ */
+public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActivity {
+
+    protected VB binding;
+    private LinearLayout titleLayout;
+
+    /* ========== 生命周期 ========== */
+    @Override
+    protected final void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        /* 1. 创建 Binding */
+        binding = createBinding();
+
+        setContentView(binding.getRoot());
+
+        /* 2. 初始化通用 UI */
+        initCommonUI();
+
+        /* 3. 业务初始化 */
+        init();
+        new Thread(()->initData()).start();
+        runOnUiThread(()->initUI());
+    }
+
+    /* 反射生成 Binding：MyActivity -> ActivityMainBinding.inflate(getLayoutInflater()) */
+    @SuppressWarnings("unchecked")
+    private VB createBinding() {
+        try {
+            /* 拿到泛型实参 <VB> */
+            Type superClass = getClass().getGenericSuperclass();
+            ParameterizedType parameterized = (ParameterizedType) superClass;
+            Class<VB> vbClass = (Class<VB>) parameterized.getActualTypeArguments()[0];
+
+            /* 取静态方法 inflate(LayoutInflater) */
+            Method inflateMethod = vbClass.getDeclaredMethod("inflate", android.view.LayoutInflater.class);
+            return (VB) inflateMethod.invoke(null, getLayoutInflater());
+        } catch (Exception e) {
+            throw new RuntimeException("BaseActivity 反射创建 Binding 失败", e);
+        }
+    }
+
+    /* 子类必须实现：写业务逻辑 */
+    protected abstract void init();
+    protected abstract void initData();
+    protected abstract void initUI();
+
+    public void onConfigTitltBar(){
+
+    }
+    /* ========== 通用 UI 初始化 ========== */
+    protected void initCommonUI() {
+        // 例：沉浸栏
+        setImmersiveStatusBar(true);
+    }
+
+    /* ========== 沉浸栏 ========== */
+    protected void setImmersiveStatusBar(boolean lightStatusBar) {
+        View decor = getWindow().getDecorView();
+        int flag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+        if (lightStatusBar) {
+            flag |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        }
+        decor.setSystemUiVisibility(flag);
+    }
+
+    /* ========== 软键盘 ========== */
+    public void hideSoftInput() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (getCurrentFocus() != null && imm != null) {
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }
+    }
+
+    public void showSoftInput(View view) {
+        InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            view.requestFocus();
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
+    /* ========== Toast ========== */
+    public void toast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+    public void toastLong(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    }
+
+    /* ========== 加载框（简易） ========== */
+    private androidx.appcompat.app.AlertDialog loadingDialog;
+
+    public void showLoading() {
+        if (loadingDialog == null) {
+            loadingDialog = new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setView(new android.widget.ProgressBar(this))
+                    .setCancelable(false)
+                    .create();
+        }
+        loadingDialog.show();
+    }
+
+    public void dismissLoading() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
+    }
+
+    /* ========== 权限申请封装（可选） ========== */
+    public interface PermissionCallback {
+        void onGranted();
+        void onDenied();
+    }
+
+    private PermissionCallback permissionCallback;
+
+    public void requestPermission(String[] permissions, PermissionCallback callback) {
+        this.permissionCallback = callback;
+        androidx.core.app.ActivityCompat.requestPermissions(this, permissions, 100);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 100) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            if (allGranted && permissionCallback != null) {
+                permissionCallback.onGranted();
+            } else if (permissionCallback != null) {
+                permissionCallback.onDenied();
+            }
+        }
+    }
+
+    /* ========== 内存泄漏保护 ========== */
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        dismissLoading();
+        binding = null;
+    }
+}
