@@ -65,7 +65,10 @@ public class HotFragment extends BaseFragment<FragmentHotBinding> {
 
     }
     private void getData(){
-        binding.getRoot().setRefreshing(true);
+        getActivity().runOnUiThread(()->{
+            binding.getRoot().setRefreshing(true);
+        });
+
         page=1;
         /* 网络请求 */
         HttpUtil.get().getAsync(IWARA_API.getHomeVideos("trending", 20,1), null, new HttpUtil.NetCallback() {
@@ -76,7 +79,10 @@ public class HotFragment extends BaseFragment<FragmentHotBinding> {
                     HomeVideoPayload homeVideoPayload=new Gson().fromJson(respBody, HomeVideoPayload.class);
                     Log.d("IWARAAdapter", "loadMore 返回 size = " + homeVideoPayload.getResults().size());
                     adapter.refresh(homeVideoPayload.getResults());
-                    binding.getRoot().setRefreshing(false);
+                    getActivity().runOnUiThread(()->{
+                        binding.getRoot().setRefreshing(false);
+                    });
+
                 });
             }
 

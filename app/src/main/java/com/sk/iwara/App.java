@@ -1,0 +1,23 @@
+package com.sk.iwara;
+
+import android.app.Application;
+
+import com.google.android.exoplayer2.database.StandaloneDatabaseProvider;
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor;
+import com.google.android.exoplayer2.upstream.cache.SimpleCache;
+
+import java.io.File;
+
+public class App extends Application {
+    private static SimpleCache sCache;          // 必须单例
+    public static SimpleCache getCache() { return sCache; }
+
+    @Override public void onCreate() {
+        super.onCreate();
+        File cacheDir = new File(getExternalCacheDir(), "exo_video");
+        // 50 MB LRU 驱逐
+        sCache = new SimpleCache(cacheDir,
+                new LeastRecentlyUsedCacheEvictor(50 * 1024 * 1024),
+                new StandaloneDatabaseProvider(this));
+    }
+}

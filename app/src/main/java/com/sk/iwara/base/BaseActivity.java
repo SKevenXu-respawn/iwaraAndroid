@@ -49,8 +49,8 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
 
         /* 3. 业务初始化 */
         init();
-        new Thread(()->initData()).start();
-        runOnUiThread(()->initUI());
+        initUI();
+        initData();
     }
 
     /* 反射生成 Binding：MyActivity -> ActivityMainBinding.inflate(getLayoutInflater()) */

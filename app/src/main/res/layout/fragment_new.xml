@@ -2,16 +2,10 @@
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
+    android:background="#F4F4F4"
     android:layout_height="match_parent">
-    <ScrollView
-        android:id="@+id/new_scroll"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical">
-        <GridLayout
-            android:id="@+id/new_grid"
-            android:layout_width="match_parent"
-            android:columnCount="3"
-            android:layout_height="match_parent"/>
-    </ScrollView>
+   <androidx.recyclerview.widget.RecyclerView
+       android:id="@+id/new_recyle"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"/>
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
