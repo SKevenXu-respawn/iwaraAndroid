@@ -53,6 +53,13 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
         initData();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateUI();
+        updateData();
+    }
+
     /* 反射生成 Binding：MyActivity -> ActivityMainBinding.inflate(getLayoutInflater()) */
     @SuppressWarnings("unchecked")
     private VB createBinding() {
@@ -74,7 +81,8 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
     protected abstract void init();
     protected abstract void initData();
     protected abstract void initUI();
-
+    protected  void updateUI(){};
+    protected  void updateData(){};
     public void onConfigTitltBar(){
 
     }

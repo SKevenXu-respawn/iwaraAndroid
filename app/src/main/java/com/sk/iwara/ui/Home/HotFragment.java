@@ -71,7 +71,7 @@ public class HotFragment extends BaseFragment<FragmentHotBinding> {
 
         page=1;
         /* 网络请求 */
-        HttpUtil.get().getAsync(IWARA_API.getHomeVideos("trending", 20,1), null, new HttpUtil.NetCallback() {
+        HttpUtil.get().getAsync(IWARA_API.getHomeVideos("trending", 20,1), null,null, new HttpUtil.NetCallback() {
             @Override
             public void onSuccess(String respBody) {
                 getActivity().runOnUiThread(()->{
@@ -97,7 +97,7 @@ public class HotFragment extends BaseFragment<FragmentHotBinding> {
         if (isLoading) return;           // 防止重复
         isLoading = true;
 
-        HttpUtil.get().getAsync(IWARA_API.getHomeVideos("trending", 20, ++page), null,
+        HttpUtil.get().getAsync(IWARA_API.getHomeVideos("trending", 20, ++page), null,null,
                 new HttpUtil.NetCallback() {
                     @Override
                     public void onSuccess(String respBody) {

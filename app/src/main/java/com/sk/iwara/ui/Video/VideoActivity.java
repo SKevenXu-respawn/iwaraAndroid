@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
@@ -54,8 +55,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
     @Override
     protected void init() {
         binding.videoToolsSeekBar.post(progressRunnable);
-        VideoPagerAdapter adapter = new VideoPagerAdapter(this);
-        binding.viewPager.setAdapter(adapter);
+
 
     }
 
@@ -64,7 +64,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
         Bundle bd= getIntent().getBundleExtra("data");
         id= bd.getString("id");
         Log.d("VideoActivity",id);
-        HttpUtil.get().getAsync(IWARA_API.VIDEO+"/video/"+id, null, new HttpUtil.NetCallback() {
+        HttpUtil.get().getAsync(IWARA_API.VIDEO+"/video/"+id, null,null, new HttpUtil.NetCallback() {
             @Override
             public void onSuccess(String respBody) {
                 Log.d("VideoActivity",respBody);
@@ -72,7 +72,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
                 VideoDetailPayload videoDetailPayload=new Gson().fromJson(respBody,VideoDetailPayload.class);
 
                 updateUI(videoDetailPayload);
-                HttpUtil.get().getAsync(videoDetailPayload.getFileUrl(), null, new HttpUtil.NetCallback() {
+                HttpUtil.get().getAsync(videoDetailPayload.getFileUrl(), null, null,new HttpUtil.NetCallback() {
                     @Override
                     public void onSuccess(String respBody) {
                         runOnUiThread(()->{
@@ -112,11 +112,21 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
 
         runOnUiThread(()->{
             // 1. 把值抛出去
-            Bundle result = new Bundle();
-            result.putString("data", new Gson().toJson(videoDetailPayload));
-            getSupportFragmentManager().setFragmentResult("videoData", result);
-            //TODO
+            binding.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    // 当用户滑到 0 或 1 时再发
+                    Bundle b = new Bundle();
+                    b.putString("data", new Gson().toJson(videoDetailPayload));
+                    getSupportFragmentManager().setFragmentResult("videoData", b);
+                }
+            });
+//            Bundle result = new Bundle();
+//            result.putString("data", new Gson().toJson(videoDetailPayload));
+//            getSupportFragmentManager().setFragmentResult("videoData", result);
 
+            VideoPagerAdapter adapter = new VideoPagerAdapter(this);
+            binding.viewPager.setAdapter(adapter);
 
             new TabLayoutMediator(binding.tabLayout, binding.viewPager,
                     (tab, position) -> tab.setText(position == 0 ? "推荐视频" : "评论 "+videoDetailPayload.getNumComments())
@@ -140,7 +150,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
             Glide.with(this)
                     .load(glideUrl)
                     .circleCrop()
-                    .error(R.mipmap.no_icon)
+                    .error(R.mipmap.logo)
                     .into(binding.videoDetailUserThumb);
         });
 

@@ -60,7 +60,7 @@ public class PopularFragment extends BaseFragment<FragmentPopularBinding> {
     }
     private void getData(){
         binding.getRoot().setRefreshing(true);
-        HttpUtil.get().getAsync(IWARA_API.getHomeVideos("popularity", 20,1), null, new HttpUtil.NetCallback() {
+        HttpUtil.get().getAsync(IWARA_API.getHomeVideos("popularity", 20,1), null,null, new HttpUtil.NetCallback() {
             @Override
             public void onSuccess(String respBody) {
                 getActivity().runOnUiThread(()->{
@@ -82,7 +82,7 @@ public class PopularFragment extends BaseFragment<FragmentPopularBinding> {
         if (isLoading) return;           // 防止重复
         isLoading = true;
 
-        HttpUtil.get().getAsync(IWARA_API.getHomeVideos("trending", 20, ++page), null,
+        HttpUtil.get().getAsync(IWARA_API.getHomeVideos("trending", 20, ++page), null,null,
                 new HttpUtil.NetCallback() {
                     @Override
                     public void onSuccess(String respBody) {

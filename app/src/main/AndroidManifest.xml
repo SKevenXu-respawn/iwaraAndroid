@@ -33,6 +33,11 @@
             android:theme="@style/AppTheme.NoActionBar.NonImmersive"
             android:exported="true">
         </activity>
+        <activity
+            android:name=".ui.Login.LoginActivity"
+            android:theme="@style/AppTheme.NoActionBar.NonImmersive"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>
