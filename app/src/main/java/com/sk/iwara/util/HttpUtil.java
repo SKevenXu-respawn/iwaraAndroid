@@ -7,6 +7,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.File;
 import java.io.IOException;
@@ -145,9 +149,17 @@ public final class HttpUtil {
         }
         @Override public void onResponse(@NonNull Call call, @NonNull Response response) {
             try (ResponseBody body = response.body()) {
+
                 if (body == null) throw new IOException("body null");
-                target.onSuccess(body.string());
-                Log.d("HttpUtil",body.string());
+                String json = body.string();
+// 先解析再格式化，保证合法
+                JsonElement je = new JsonParser().parse(json);
+                String pretty = new GsonBuilder()
+                        .setPrettyPrinting()
+                        .create()
+                        .toJson(je);
+                Log.d("HttpUtil", pretty);
+                target.onSuccess(json);
             } catch (Exception e) {
                 target.onFailure(e);
             }

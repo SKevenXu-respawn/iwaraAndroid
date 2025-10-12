@@ -38,7 +38,7 @@ public class TalkFragment extends BaseFragment<FragmentTalkBinding> {
                         getActivity().runOnUiThread(()->{
                             commentsPayload=new Gson().fromJson(respBody, CommentsPayload.class);
                             Log.d("Talk", "收到评论=" + commentsPayload.getResults().size());
-                            adapter.addData(commentsPayload.getResults());
+                            adapter.refresh(commentsPayload.getResults());
                         });
 
 

@@ -137,21 +137,29 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
             binding.videoDetailUserUpdate.setText(DateUtil.FormatDate( videoDetailPayload.getFile().getUpdatedAt()));
             binding.videoDetailLikesNum.setText(String.valueOf(videoDetailPayload.getNumLikes()) );
             binding.videoDetailViewsNum.setText(String.valueOf(videoDetailPayload.getNumViews()));
+            if (videoDetailPayload.getUser().getAvatar()!=null){
+                GlideUrl glideUrl = new GlideUrl("https://i.iwara.tv/image/avatar/"+videoDetailPayload.getUser().getAvatar().getId()+"/"+videoDetailPayload.getUser().getAvatar().getName(), new LazyHeaders.Builder()
+                        .addHeader("User-Agent",
+                                "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 Edg/140.0.0.0")
+                        .addHeader("Referer", "https://www.iwara.tv/")
+                        .addHeader("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+                        .addHeader("content-type", "image/jpeg")
+                        // 如果浏览器带了 Cookie 也加进来
+                        // .addHeader("Cookie", "session=xxx")
+                        .build());
+                Glide.with(this)
+                        .load(glideUrl)
+                        .circleCrop()
+                        .error(R.mipmap.logo)
+                        .into(binding.videoDetailUserThumb);
+            }else{
+                Glide.with(binding.videoDetailUserThumb.getContext())
+                        .load(R.mipmap.no_icon)
+                        .circleCrop()
+                        .error(R.mipmap.no_icon)
+                        .into(binding.videoDetailUserThumb);
+            }
 
-            GlideUrl glideUrl = new GlideUrl("https://i.iwara.tv/image/avatar/"+videoDetailPayload.getUser().getAvatar().getId()+"/"+videoDetailPayload.getUser().getAvatar().getName(), new LazyHeaders.Builder()
-                    .addHeader("User-Agent",
-                            "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 Edg/140.0.0.0")
-                    .addHeader("Referer", "https://www.iwara.tv/")
-                    .addHeader("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
-                    .addHeader("content-type", "image/jpeg")
-                    // 如果浏览器带了 Cookie 也加进来
-                    // .addHeader("Cookie", "session=xxx")
-                    .build());
-            Glide.with(this)
-                    .load(glideUrl)
-                    .circleCrop()
-                    .error(R.mipmap.logo)
-                    .into(binding.videoDetailUserThumb);
         });
 
     }

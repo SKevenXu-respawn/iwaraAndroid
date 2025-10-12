@@ -1,0 +1,16 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+    <!-- 悬浮条：永远最上层 -->
+    <include layout="@layout/base_float_view" />
+    <!-- 真实内容容器 -->
+    <FrameLayout
+        android:id="@+id/real_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+</LinearLayout>

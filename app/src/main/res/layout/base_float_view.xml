@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    android:id="@+id/float_root"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="8dp"
+    android:elevation="2dp"
+    android:fitsSystemWindows="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <!-- 1. 搜索栏 -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/base_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:navigationIcon="@mipmap/menu"
+        app:contentInsetStartWithNavigation="0dp">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/base_searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:queryHint="搜索内容"
+            app:iconifiedByDefault="true"
+            />
+    </com.google.android.material.appbar.MaterialToolbar>
+</FrameLayout>
