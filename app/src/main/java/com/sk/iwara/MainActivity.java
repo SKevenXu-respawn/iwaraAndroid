@@ -12,16 +12,21 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
@@ -30,14 +35,19 @@ import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.base.BaseActivity;
 import com.sk.iwara.databinding.ActivityMainBinding;
 import com.sk.iwara.payload.HomeVideoPayload;
-import com.sk.iwara.ui.Bbs.BbsActivity;
-import com.sk.iwara.ui.Collect.CollectActivity;
+
+import com.sk.iwara.ui.Bbs.BbsFragment;
+
+import com.sk.iwara.ui.Collect.CollectFragment;
+import com.sk.iwara.ui.Home.HomeFragment;
 import com.sk.iwara.ui.Home.HotFragment;
 import com.sk.iwara.ui.Home.NewFragment;
 import com.sk.iwara.ui.Home.PopularFragment;
 import com.sk.iwara.ui.Login.LoginActivity;
-import com.sk.iwara.ui.Settings.SettingActivity;
-import com.sk.iwara.ui.Update.UpdateActivity;
+
+import com.sk.iwara.ui.Settings.SettingFragment;
+
+import com.sk.iwara.ui.Update.UpdateFragment;
 import com.sk.iwara.ui.User.UserActivity;
 import com.sk.iwara.util.DateUtil;
 import com.sk.iwara.util.HttpUtil;
@@ -47,57 +57,133 @@ import com.sk.iwara.util.ToastUtil;
 import java.util.List;
 
 public class MainActivity extends BaseActivity<ActivityMainBinding> {
-    private final String[] titles = {"热门视频", "人气视频", "最新视频"};
+    private static final int HOME_FRAGMENT = R.id.menu_video;
 
     @Override
     protected void init() {
-        /* 2. ViewPager2 适配器 */
-        setItemSelect(R.id.menu_video);
-        binding.homeViewPager2.setAdapter(new FragmentStateAdapter(this) {
-            @NonNull
-            @Override
-            public Fragment createFragment(int position) {
-                switch (position) {
-                    case 0: return new HotFragment();
-                    case 1: return new PopularFragment();
-                    default: return new NewFragment();
-                }
-            }
-            @Override
-            public int getItemCount() {
-                return titles.length;
+
+       binding.navView.setNavigationItemSelectedListener(item -> {
+           Fragment fragment = null;
+
+           if (item.getItemId() == HOME_FRAGMENT) {
+               fragment = new HomeFragment();
+           } else if (item.getItemId() == R.id.menu_setting) {
+               fragment = new SettingFragment();
+           } else if (item.getItemId() == R.id.menu_collect) {
+               fragment = new CollectFragment();
+           } else if (item.getItemId() == R.id.menu_talk) {
+               fragment = new BbsFragment();
+           } else if (item.getItemId() == R.id.menu_update) {
+               fragment = new UpdateFragment();
+           }
+// 添加更多菜单项处理逻辑
+
+           // 获取当前显示的 Fragment
+           Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+
+           // 检查当前 Fragment 是否已经是目标 Fragment
+           if (fragment != null && (currentFragment == null || !fragment.getClass().equals(currentFragment.getClass()))) {
+               getSupportFragmentManager().beginTransaction()
+                       .replace(R.id.content_frame, fragment)
+                       .addToBackStack(null)
+                       .commit();
+           }
+
+           binding.drawerLayout.closeDrawer(GravityCompat.START);
+           return true;
+        });
+
+        // 初始化悬浮搜索栏
+        MaterialToolbar searchToolbar = findViewById(R.id.base_toolbar);
+
+
+
+        // 设置悬浮搜索栏的导航按钮（返回键）点击事件
+        searchToolbar.setNavigationOnClickListener(v -> {
+            if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+                binding.drawerLayout.closeDrawer(GravityCompat.START);
+            } else {
+                binding.drawerLayout.openDrawer(GravityCompat.START);
             }
         });
-        for (String t : titles) {
-            TextView tv = (TextView) LayoutInflater.from(this)
-                    .inflate(R.layout.item_tab, binding.homeTabLayout, false);
-            tv.setText(t);
-            binding.homeTabLayout.addTab(binding.homeTabLayout.newTab().setCustomView(tv));
+        if (LoginSPUtil.getInstance(this).get("access_token","null").equals("null")){
+            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_data).setVisibility(View.GONE);
+            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_thumb).setVisibility(View.GONE);
+            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_no_login).setVisibility(View.VISIBLE);
+            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_no_login).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    LoginSPUtil.getInstance(MainActivity.this).clear();
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                }
+            });
+        }else{
+            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_data).setVisibility(View.VISIBLE);
+            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_thumb).setVisibility(View.VISIBLE);
+            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_no_login).setVisibility(View.GONE);
+            TextView name= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_name);
+            TextView username=binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_username);
+            ImageView imageView= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_image);
+            TextView join= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_join);
+            TextView lostLogin= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_last_login);
+            TextView status= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_status);
+
+            status.setText(LoginSPUtil.getInstance(this).get("status","null"));
+            lostLogin.setText(DateUtil.FormatDate(LoginSPUtil.getInstance(this).get("lastLogin","null")));
+            join.setText(DateUtil.FormatDate(LoginSPUtil.getInstance(this).get("join","null")));
+            name.setText(LoginSPUtil.getInstance(this).get("username","null"));
+            username.setText(LoginSPUtil.getInstance(this).get("name","null"));
+            if (!LoginSPUtil.getInstance(this).get("thumb","null").equals("null")){
+                GlideUrl glideUrl = new GlideUrl("https://i.iwara.tv/image/avatar/"+LoginSPUtil.getInstance(this).get("thumb","null"), new LazyHeaders.Builder()
+                        .addHeader("User-Agent",
+                                "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 Edg/140.0.0.0")
+                        .addHeader("Referer", "https://www.iwara.tv/")
+                        .addHeader("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+                        .addHeader("content-type", "image/jpeg")
+                        // 如果浏览器带了 Cookie 也加进来
+                        // .addHeader("Cookie", "session=xxx")
+                        .build());
+                Glide.with(imageView.getContext())
+                        .load(glideUrl)
+                        .circleCrop()
+                        .error(R.mipmap.no_icon)
+                        .into(imageView);
+            }else{
+                Glide.with(imageView.getContext())
+                        .load(R.mipmap.no_icon)
+                        .circleCrop()
+                        .error(R.mipmap.no_icon)
+                        .into(imageView);
+            }
+            binding.navView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    startActivity(new Intent(MainActivity.this, UserActivity.class));
+                }
+            });
+
         }
-        new TabLayoutMediator(binding.homeTabLayout, binding.homeViewPager2,
-                (tab, position) -> {
-                    TextView tv = (TextView) LayoutInflater.from(MainActivity.this)
-                            .inflate(R.layout.item_tab, binding.homeTabLayout, false);
-                    tv.setText(titles[position]);
-                    tab.setCustomView(tv);
-                }).attach();
-
-
-
-
-
-
     }
 
     @Override
     protected void updateUI() {
         super.updateUI();
-
-
     }
 
     @Override
     protected void initUI() {
+        // 设置状态栏颜色
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS); // 清除半透明状态
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(Color.parseColor("#FFFFFF")); // 设置状态栏颜色
+        }
+        binding.navView.setCheckedItem(R.id.menu_video);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, new HomeFragment())
+                    .commit();
 
     }
     @Override
@@ -105,8 +191,35 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
 
     }
 
-
-
+    @Override
+    public void onBackPressed() {
+        // 如果有 Fragment 在回退栈中，返回到上一个 Fragment
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+            // 同步选中项到当前 Fragment
+            int currentItemId = getCurrentFragmentId();
+            binding.navView.setCheckedItem(currentItemId);
+        } else {
+            // 如果回退栈为空，退出应用
+            super.onBackPressed();
+        }
+    }
+    private int getCurrentFragmentId() {
+        // 获取当前 Fragment 的 ID
+        Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+        if (currentFragment instanceof HomeFragment) {
+            return R.id.menu_video;
+        } else if (currentFragment instanceof SettingFragment) {
+            return R.id.menu_setting;
+        } else if (currentFragment instanceof CollectFragment) {
+            return R.id.menu_collect;
+        } else if (currentFragment instanceof BbsFragment) {
+            return R.id.menu_talk;
+        } else if (currentFragment instanceof UpdateFragment) {
+            return R.id.menu_update;
+        }
+        return R.id.menu_video; // 默认返回首页
+    }
 
 
 }

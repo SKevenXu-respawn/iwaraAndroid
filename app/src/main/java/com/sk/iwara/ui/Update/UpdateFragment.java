@@ -1,13 +1,14 @@
-package com.sk.iwara.ui.Collect;
+package com.sk.iwara.ui.Update;
 
 import com.sk.iwara.R;
 import com.sk.iwara.base.BaseActivity;
-import com.sk.iwara.databinding.ActivityCollectBinding;
+import com.sk.iwara.base.BaseFragment;
+import com.sk.iwara.databinding.ActivityUpdateBinding;
 
-public class CollectActivity extends BaseActivity<ActivityCollectBinding> {
+public class UpdateFragment extends BaseFragment<ActivityUpdateBinding> {
     @Override
     protected void init() {
-        setItemSelect(R.id.menu_collect);
+
     }
 
     @Override
