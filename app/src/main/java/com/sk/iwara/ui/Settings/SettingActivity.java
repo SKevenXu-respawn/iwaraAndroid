@@ -1,5 +1,7 @@
 package com.sk.iwara.ui.Settings;
 
+import android.util.Log;
+
 import com.sk.iwara.R;
 import com.sk.iwara.base.BaseActivity;
 import com.sk.iwara.databinding.ActivitySettingBinding;
@@ -17,6 +19,6 @@ public class SettingActivity extends BaseActivity<ActivitySettingBinding> {
 
     @Override
     protected void initUI() {
-
+        Log.d("temp","tenmpo");
     }
 }
