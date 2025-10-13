@@ -1,5 +1,7 @@
 package com.sk.iwara.ui.Video;
 
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -33,6 +35,7 @@ import com.sk.iwara.payload.VideoDetailPayload;
 import com.sk.iwara.payload.VideoPlayListPayload;
 import com.sk.iwara.util.DateUtil;
 import com.sk.iwara.util.HttpUtil;
+import com.sk.iwara.util.PlayerSwipeSeek;
 import com.sk.iwara.util.PlayerUtil;
 
 import java.lang.reflect.Type;
@@ -42,6 +45,7 @@ import java.util.List;
 public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
     private ExoPlayer player;
     private String id;
+    private boolean isFullScreen=false;
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
@@ -167,10 +171,14 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
     protected void initUI() {
         player = PlayerUtil.createCachedPlayer(VideoActivity.this);
         binding.playerView.setPlayer(player);
+        new PlayerSwipeSeek() .setOnClickListener(() -> {
+            toggleControl();
+        }).attach(binding.playerView);
         binding.videoToolsTogglePlay.setOnClickListener(v -> {
             player.setPlayWhenReady(!player.getPlayWhenReady());
 
         });
+        binding.videoToolsTurn.setOnClickListener(v->toggleFullScreen());
         updatePlayBtn();
         binding.videoToolsBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,9 +214,26 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
                 player.seekTo(newPosition);   // 关键：真正跳转
             }
         });
-        binding.playerView.setOnClickListener(v -> toggleControl());
+
         handler.post(progressRunnable);
     }
+
+    @Override
+    public void onBackPressed() {
+        if (isFullScreen){
+            toggleFullScreen();
+        }else{
+            super.onBackPressed();
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (player != null) player.setPlayWhenReady(false);
+    }
+
     /* 7. 进度条 1 秒刷新一次 */
     private final Runnable progressRunnable = new Runnable() {
         @Override
@@ -226,9 +251,10 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
     };
     /* 8. 工具：更新图标 */
     private void updatePlayBtn() {
-        binding.videoToolsTogglePlay.setImageResource(player.getPlayWhenReady()
+        Glide.with(this).load(player.getPlayWhenReady()
                 ? R.mipmap.play
-                : R.mipmap.pause);
+                : R.mipmap.pause).into(binding.videoToolsTogglePlay);
+
     }
     private void toggleControl() {
         binding.videoToolsTop.setVisibility(
@@ -236,6 +262,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
         binding.videoToolsBottom.setVisibility(
                 binding.videoToolsBottom.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
     }
+
     private String formatTime(long ms) {
         long s = ms / 1000;
         long h = s / 3600, m = (s % 3600) / 60, sec = s % 60;
@@ -253,5 +280,37 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
 
         @Override
         public int getItemCount() { return 2; }
+    }
+    private void toggleFullScreen() {
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            // 可以在这里进行一些全屏状态下的布局调整等操作
+           binding.videoTextView.setVisibility(View.GONE);
+            hideSystemUI();
+            toggleControl();
+            isFullScreen=true;
+        } else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            binding.videoTextView.setVisibility(View.VISIBLE);
+            showSystemUI();
+            toggleControl();
+            isFullScreen=false;
+        }
+    }
+    private void hideSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    }
+    private void showSystemUI() {
+        View decorView = getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
     }
 }

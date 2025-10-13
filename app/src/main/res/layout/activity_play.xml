@@ -7,13 +7,16 @@
     android:fitsSystemWindows="true"
     android:layout_height="match_parent">
     <FrameLayout
+        android:layout_weight="11"
         android:layout_width="match_parent"
-        android:layout_height="250dp">
+        android:layout_height="match_parent">
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/player_view"
             app:use_controller="false"
+            android:background="@color/black"
             android:layout_width="match_parent"
-            android:layout_height="250dp" />
+            app:show_buffering="when_playing"
+            android:layout_height="match_parent" />
         <LinearLayout
             android:id="@+id/video_tools_top"
             android:layout_width="match_parent"
@@ -98,116 +101,124 @@
         </LinearLayout>
     </FrameLayout>
     <LinearLayout
+        android:id="@+id/video_text_view"
+        android:layout_weight="4"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
-        android:background="@color/white"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/video_detail_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="标题标题标题标题"
-            android:textSize="18dp"
-            android:paddingTop="16dp"
-            android:paddingStart="16dp"
-            android:maxLines="1"
-            android:ellipsize="end"
-
-            />
-        <TextView
-            android:id="@+id/video_detail_jianjie"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="简介简介简介简介"
-            android:textSize="14dp"
-            android:paddingTop="16dp"
-            android:paddingStart="16dp"
-            android:maxLines="1"
-            android:ellipsize="end"
-            />
+        android:orientation="vertical"
+        android:layout_height="match_parent">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-            <ImageView
-                android:id="@+id/video_detail_user_thumb"
-                android:layout_width="45dp"
-                android:layout_height="45dp" />
-            <FrameLayout
+            android:id="@+id/video_detail_view"
+            android:background="@color/white"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/video_detail_title"
                 android:layout_width="match_parent"
-                android:layout_height="50dp">
-                <TextView
-                    android:id="@+id/video_detail_user_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14dp"
-                    android:layout_gravity="top|start"
-                    android:paddingStart="8dp"
-                    />
-                <TextView
-                    android:id="@+id/video_detail_user_update"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="标题标题标题标题"
+                android:textSize="18dp"
+                android:paddingTop="16dp"
+                android:paddingStart="16dp"
+                android:maxLines="1"
+                android:ellipsize="end"
 
-                    android:layout_gravity="bottom|start"
-                    android:textSize="12dp"
-                    android:textColor="#77000000"
-                    android:paddingStart="8dp"
-                    />
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end|top"
-                    android:orientation="horizontal">
+                />
+            <TextView
+                android:id="@+id/video_detail_jianjie"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="简介简介简介简介"
+                android:textSize="14dp"
+                android:paddingTop="16dp"
+                android:paddingStart="16dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/video_detail_user_thumb"
+                    android:layout_width="45dp"
+                    android:layout_height="45dp" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp">
                     <TextView
-                        android:id="@+id/video_detail_views_num"
+                        android:id="@+id/video_detail_user_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="12dp"/>
-                    <ImageView
+                        android:textSize="14dp"
+                        android:layout_gravity="top|start"
+                        android:paddingStart="8dp"
+                        />
+                    <TextView
+                        android:id="@+id/video_detail_user_update"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@mipmap/views"/>
-                </LinearLayout>
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end|bottom"
-                    android:orientation="horizontal">
-                <TextView
-                    android:id="@+id/video_detail_likes_num"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="12dp"/>
-                    <ImageView
+
+                        android:layout_gravity="bottom|start"
+                        android:textSize="12dp"
+                        android:textColor="#77000000"
+                        android:paddingStart="8dp"
+                        />
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:background="@mipmap/like"/>
-                </LinearLayout>
-            </FrameLayout>
+                        android:layout_gravity="end|top"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/video_detail_views_num"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12dp"/>
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@mipmap/views"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/video_detail_likes_num"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:textSize="12dp"/>
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:background="@mipmap/like"/>
+                    </LinearLayout>
+                </FrameLayout>
+            </LinearLayout>
+
         </LinearLayout>
+        <!-- 切换栏 -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tab_layout"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@color/white"
+            app:tabIndicatorColor="@color/black"
+            app:tabTextColor="@color/black"
+            app:tabSelectedTextColor="@color/black"
+            app:tabMode="fixed" />
 
+        <!-- 内容页 -->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
     </LinearLayout>
-    <!-- 切换栏 -->
-    <com.google.android.material.tabs.TabLayout
-        android:id="@+id/tab_layout"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@color/white"
-        app:tabIndicatorColor="@color/black"
-        app:tabTextColor="@color/black"
-        app:tabSelectedTextColor="@color/black"
-        app:tabMode="fixed" />
 
-    <!-- 内容页 -->
-    <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
 </LinearLayout>
