@@ -1,16 +1,19 @@
 package com.sk.iwara.ui.Login;
 
+import android.app.Dialog;
 import android.util.Log;
 import android.view.View;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.sk.iwara.R;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.base.BaseActivity;
 import com.sk.iwara.databinding.ActivityLoginBinding;
 import com.sk.iwara.payload.TokenPayload;
 import com.sk.iwara.payload.UserPayload;
 import com.sk.iwara.util.HttpUtil;
+import com.sk.iwara.util.LoadingUtil;
 import com.sk.iwara.util.LoginSPUtil;
 import com.sk.iwara.util.ToastUtil;
 
@@ -45,6 +48,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                 if (binding.loginPassword.getText().toString().isEmpty()||binding.loginEmail.getText().toString().isEmpty()){
                     ToastUtil.ToastUtil("请输入邮箱或密码",LoginActivity.this);
                 }else{
+
+                    showLoading();
+
                     JsonObject jsonObject=new JsonObject();
                     jsonObject.addProperty("email",binding.loginEmail.getText().toString());
                     jsonObject.addProperty("password",binding.loginPassword.getText().toString());
@@ -80,6 +86,8 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                                                                     tokenPayload.getAccess_token(),
                                                                     userPayload.getUser().getAvatar()==null?null: userPayload.getUser().getAvatar().getId()+"/"+userPayload.getUser().getAvatar().getName());
                                                             ToastUtil.ToastUtil(userPayload.getUser().getName()+" 欢迎回来!",LoginActivity.this);
+                                                            dismissLoading();
+
                                                             onBackPressed();
                                                         });
 
@@ -88,6 +96,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
                                                 @Override
                                                 public void onFailure(Exception e) {
+                                                    dismissLoading();
                                                     Log.d("LoginActivity",e.getMessage());
                                                     ToastUtil.ToastUtil("登陆失败，请检查账号密码是否正确! 以下为错误信息:\n"+e.getMessage(),LoginActivity.this);
                                                 }
@@ -97,6 +106,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
                                     @Override
                                     public void onFailure(Exception e) {
+                                        dismissLoading();
                                         Log.d("LoginActivity",e.getMessage());
                                         ToastUtil.ToastUtil("登陆失败，请检查账号密码是否正确! 以下为错误信息:\n"+e.getMessage(),LoginActivity.this);
                                     }
@@ -107,6 +117,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
                         @Override
                         public void onFailure(Exception e) {
+                            dismissLoading();
                             Log.d("LoginActivity",e.getMessage());
                             ToastUtil.ToastUtil("登陆失败，请检查账号密码是否正确! 以下为错误信息:\n"+e.getMessage(),LoginActivity.this);
                         }

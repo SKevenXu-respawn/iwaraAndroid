@@ -1,6 +1,7 @@
 package com.sk.iwara.base;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewbinding.ViewBinding;
+
+import com.sk.iwara.R;
+import com.sk.iwara.util.LoadingUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -104,21 +108,14 @@ public abstract class BaseFragment<VB extends ViewBinding> extends Fragment {
     }
 
     /* ======== 加载框（简易） ======== */
-    private androidx.appcompat.app.AlertDialog loadingDialog;
-
+    private Dialog dialog;
     public void showLoading() {
-        if (loadingDialog == null) {
-            loadingDialog = new androidx.appcompat.app.AlertDialog.Builder(host)
-                    .setView(new android.widget.ProgressBar(host))
-                    .setCancelable(false)
-                    .create();
-        }
-        loadingDialog.show();
+        dialog= LoadingUtil.show(getContext(), R.mipmap.logo,false);
     }
 
     public void dismissLoading() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            loadingDialog.dismiss();
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
         }
     }
 

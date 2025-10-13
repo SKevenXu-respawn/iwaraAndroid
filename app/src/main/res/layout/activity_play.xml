@@ -116,7 +116,6 @@
                 android:id="@+id/video_detail_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="标题标题标题标题"
                 android:textSize="18dp"
                 android:paddingTop="16dp"
                 android:paddingStart="16dp"
@@ -128,11 +127,10 @@
                 android:id="@+id/video_detail_jianjie"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="简介简介简介简介"
                 android:textSize="14dp"
                 android:paddingTop="16dp"
                 android:paddingStart="16dp"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end"
                 />
             <LinearLayout
@@ -145,60 +143,81 @@
                     android:id="@+id/video_detail_user_thumb"
                     android:layout_width="45dp"
                     android:layout_height="45dp" />
-                <FrameLayout
+                <LinearLayout
                     android:layout_width="match_parent"
+                    android:orientation="horizontal"
                     android:layout_height="50dp">
-                    <TextView
-                        android:id="@+id/video_detail_user_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="14dp"
-                        android:layout_gravity="top|start"
-                        android:paddingStart="8dp"
-                        />
-                    <TextView
-                        android:id="@+id/video_detail_user_update"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/video_detail_user_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="14dp"
+                            android:gravity="center_vertical"
+                            android:paddingStart="8dp"
+                            />
+                        <TextView
+                            android:layout_weight="1"
+                            android:id="@+id/video_detail_user_update"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="12dp"
+                            android:gravity="center_vertical"
+                            android:textColor="#77000000"
+                            android:paddingStart="8dp"
+                            />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end"
+                            android:layout_weight="1"
+                            android:orientation="horizontal">
+                            <TextView
+                                android:layout_gravity="end|center_vertical"
+                                android:id="@+id/video_detail_views_num"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="12dp"/>
+                            <ImageView
+                                android:layout_gravity="center_vertical"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@mipmap/views"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|bottom"
+                            android:orientation="horizontal">
+                            <TextView
+                                android:id="@+id/video_detail_likes_num"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="end|center_vertical"
+                                android:textSize="12dp"/>
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:background="@mipmap/like"/>
+                        </LinearLayout>
+                    </LinearLayout>
 
-                        android:layout_gravity="bottom|start"
-                        android:textSize="12dp"
-                        android:textColor="#77000000"
-                        android:paddingStart="8dp"
-                        />
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end|top"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:id="@+id/video_detail_views_num"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="12dp"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@mipmap/views"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end|bottom"
-                        android:orientation="horizontal">
-                        <TextView
-                            android:id="@+id/video_detail_likes_num"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:textSize="12dp"/>
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:background="@mipmap/like"/>
-                    </LinearLayout>
-                </FrameLayout>
+                </LinearLayout>
             </LinearLayout>
 
         </LinearLayout>
@@ -218,7 +237,9 @@
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1" >
+
+        </androidx.viewpager2.widget.ViewPager2>
     </LinearLayout>
 
 </LinearLayout>

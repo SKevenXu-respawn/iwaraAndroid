@@ -37,6 +37,7 @@ import com.sk.iwara.util.DateUtil;
 import com.sk.iwara.util.HttpUtil;
 import com.sk.iwara.util.PlayerSwipeSeek;
 import com.sk.iwara.util.PlayerUtil;
+import com.sk.iwara.util.VideoTask;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -49,11 +50,12 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
 
     private Handler handler = new Handler(Looper.getMainLooper());
 
-
     @Override protected void onStop() {
         super.onStop();
+
         player.release();
         binding.videoToolsSeekBar.removeCallbacks(progressRunnable);
+
     }
 
     @Override
@@ -68,6 +70,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
         Bundle bd= getIntent().getBundleExtra("data");
         id= bd.getString("id");
         Log.d("VideoActivity",id);
+        showLoading();
         HttpUtil.get().getAsync(IWARA_API.VIDEO+"/video/"+id, null,null, new HttpUtil.NetCallback() {
             @Override
             public void onSuccess(String respBody) {
@@ -80,7 +83,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
                     @Override
                     public void onSuccess(String respBody) {
                         runOnUiThread(()->{
-
+                            dismissLoading();
                             Type listType = new TypeToken<List<VideoPlayListPayload>>(){}.getType();
                             List<VideoPlayListPayload> videoPlayListPayloads = new Gson().fromJson(respBody, listType);
                             String url = "https:"+videoPlayListPayloads.get(0).getSrc().getView();
@@ -96,16 +99,15 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
 
                     @Override
                     public void onFailure(Exception e) {
+                        dismissLoading();
                         Log.d("VideoActivity",e.toString());
                     }
                 });
-
-
-
             }
 
             @Override
             public void onFailure(Exception e) {
+                dismissLoading();
                 Log.d("VideoActivity",e.toString());
             }
         });
@@ -138,7 +140,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
             binding.videoDetailTitle.setText(videoDetailPayload.getTitle());
             binding.videoDetailJianjie.setText(videoDetailPayload.getBody());
             binding.videoDetailUserName.setText(videoDetailPayload.getUser().getUsername());
-            binding.videoDetailUserUpdate.setText(DateUtil.FormatDate( videoDetailPayload.getFile().getUpdatedAt()));
+            binding.videoDetailUserUpdate.setText(DateUtil.formatAgo( videoDetailPayload.getFile().getUpdatedAt()));
             binding.videoDetailLikesNum.setText(String.valueOf(videoDetailPayload.getNumLikes()) );
             binding.videoDetailViewsNum.setText(String.valueOf(videoDetailPayload.getNumViews()));
             if (videoDetailPayload.getUser().getAvatar()!=null){
@@ -171,9 +173,7 @@ public class VideoActivity extends BaseActivity<ActivityPlayBinding> {
     protected void initUI() {
         player = PlayerUtil.createCachedPlayer(VideoActivity.this);
         binding.playerView.setPlayer(player);
-        new PlayerSwipeSeek() .setOnClickListener(() -> {
-            toggleControl();
-        }).attach(binding.playerView);
+        new PlayerSwipeSeek().setOnClickListener(this::toggleControl).attach(binding.playerView);
         binding.videoToolsTogglePlay.setOnClickListener(v -> {
             player.setPlayWhenReady(!player.getPlayWhenReady());
 

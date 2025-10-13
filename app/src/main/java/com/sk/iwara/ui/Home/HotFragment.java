@@ -66,7 +66,7 @@ public class HotFragment extends BaseFragment<FragmentHotBinding> {
     }
     private void getData(){
         getActivity().runOnUiThread(()->{
-            if (binding.getRoot()!=null){
+            if (binding!=null){
                 binding.getRoot().setRefreshing(true);
             }
 

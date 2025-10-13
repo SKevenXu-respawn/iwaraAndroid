@@ -1,6 +1,7 @@
 package com.sk.iwara.base;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.TypedValue;
@@ -30,9 +31,11 @@ import com.google.android.material.navigation.NavigationView;
 import com.sk.iwara.MainActivity;
 import com.sk.iwara.R;
 
+import com.sk.iwara.ui.Login.LoginActivity;
 import com.sk.iwara.ui.User.UserActivity;
 import com.sk.iwara.ui.Video.VideoActivity;
 import com.sk.iwara.util.DateUtil;
+import com.sk.iwara.util.LoadingUtil;
 import com.sk.iwara.util.LoginSPUtil;
 
 import java.lang.reflect.Method;
@@ -50,6 +53,7 @@ import java.lang.reflect.Type;
 public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActivity {
 
     protected VB binding;
+    private Dialog dialog;
     private DrawerLayout drawerRoot;
     private NavigationView navView;
     private ViewGroup realContent;   // 真实内容容器
@@ -154,21 +158,14 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
     }
 
     /* ========== 加载框（简易） ========== */
-    private androidx.appcompat.app.AlertDialog loadingDialog;
 
     public void showLoading() {
-        if (loadingDialog == null) {
-            loadingDialog = new androidx.appcompat.app.AlertDialog.Builder(this)
-                    .setView(new android.widget.ProgressBar(this))
-                    .setCancelable(false)
-                    .create();
-        }
-        loadingDialog.show();
+        dialog= LoadingUtil.show(this,R.mipmap.logo,false);
     }
 
     public void dismissLoading() {
-        if (loadingDialog != null && loadingDialog.isShowing()) {
-            loadingDialog.dismiss();
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
         }
     }
 
@@ -209,7 +206,6 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
     protected void onDestroy() {
         super.onDestroy();
         dismissLoading();
-        binding = null;
     }
     /* ========== 注入抽屉+悬浮条 ========== */
 

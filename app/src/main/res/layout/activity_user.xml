@@ -7,11 +7,13 @@
     android:layout_height="match_parent">
     <include android:id="@+id/titlebar" android:layout_width="match_parent" android:layout_height="wrap_content"  android:layout_marginHorizontal="16dp" layout="@layout/titlebar"/>
     <ImageView
+        android:id="@+id/user_thumb"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginVertical="16dp"
         android:layout_gravity="center_horizontal"/>
     <TextView
+        android:id="@+id/user_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAlignment="center"

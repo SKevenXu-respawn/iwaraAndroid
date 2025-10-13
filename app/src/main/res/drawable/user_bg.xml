@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 底层：比上层大 4dp，用来做渐变边框 -->
+    <item android:left="2dp" android:right="2dp" android:top="2dp" android:bottom="2dp">
+        <shape android:shape="rectangle">
+            <corners android:radius="17dp"/>  <!-- 比上层大 2dp -->
+            <gradient
+                android:type="linear"
+                android:angle="0"
+                android:startColor="#E02525"
+                android:endColor="@color/black"/>
+        </shape>
+    </item>
+
+    <!-- 上层：真正的背景，盖住中间，只留下 2dp 的渐变边 -->
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="15dp"/>
+            <solid android:color="#FFFFFF"/> <!-- 这里放你需要的背景色 -->
+        </shape>
+    </item>
+</layer-list>

@@ -1,0 +1,51 @@
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:ordering="sequentially">   <!-- 顺序执行 -->
+
+    <!-- 第 1 次：90° 带回弹 -->
+    <set>
+        <objectAnimator
+            android:propertyName="rotation"
+            android:valueFrom="0"
+            android:valueTo="75"
+            android:duration="200"
+            android:interpolator="@android:interpolator/accelerate_quint"/>
+        <objectAnimator
+            android:propertyName="rotation"
+            android:valueFrom="75"
+            android:valueTo="90"
+            android:duration="100"
+            android:interpolator="@android:interpolator/overshoot"/>
+    </set>
+
+    <!-- 第 2 次：再转 90°（累计 180°） -->
+    <set>
+        <objectAnimator
+            android:propertyName="rotation"
+            android:valueFrom="90"
+            android:valueTo="165"
+            android:duration="200"
+            android:interpolator="@android:interpolator/accelerate_quint"/>
+        <objectAnimator
+            android:propertyName="rotation"
+            android:valueFrom="165"
+            android:valueTo="180"
+            android:duration="100"
+            android:interpolator="@android:interpolator/overshoot"/>
+    </set>
+
+    <!-- 第 3 次：再转 90°（累计 270°） -->
+    <set>
+        <objectAnimator
+            android:propertyName="rotation"
+            android:valueFrom="180"
+            android:valueTo="255"
+            android:duration="200"
+            android:interpolator="@android:interpolator/accelerate_quint"/>
+        <objectAnimator
+            android:propertyName="rotation"
+            android:valueFrom="255"
+            android:valueTo="270"
+            android:duration="100"
+            android:interpolator="@android:interpolator/overshoot"/>
+    </set>
+</set>

@@ -110,6 +110,7 @@ public class SuggestVideoAdapter extends RecyclerView.Adapter<SuggestVideoAdapte
                 Bundle bd=new Bundle();
                 bd.putString("id",bean.getId());
                 intent.putExtra("data",bd);
+
                 view.getContext().startActivity(intent);
             }
         });

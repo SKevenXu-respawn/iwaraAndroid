@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -31,11 +32,14 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.base.BaseActivity;
 import com.sk.iwara.databinding.ActivityMainBinding;
 import com.sk.iwara.payload.HomeVideoPayload;
 
+import com.sk.iwara.payload.TokenPayload;
+import com.sk.iwara.payload.UserPayload;
 import com.sk.iwara.ui.Bbs.BbsFragment;
 
 import com.sk.iwara.ui.Collect.CollectFragment;
@@ -54,7 +58,9 @@ import com.sk.iwara.util.HttpUtil;
 import com.sk.iwara.util.LoginSPUtil;
 import com.sk.iwara.util.ToastUtil;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends BaseActivity<ActivityMainBinding> {
     private static final int HOME_FRAGMENT = R.id.menu_video;
@@ -62,40 +68,39 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
     @Override
     protected void init() {
 
-       binding.navView.setNavigationItemSelectedListener(item -> {
-           Fragment fragment = null;
+        binding.navView.setNavigationItemSelectedListener(item -> {
+            Fragment fragment = null;
 
-           if (item.getItemId() == HOME_FRAGMENT) {
-               fragment = new HomeFragment();
-           } else if (item.getItemId() == R.id.menu_setting) {
-               fragment = new SettingFragment();
-           } else if (item.getItemId() == R.id.menu_collect) {
-               fragment = new CollectFragment();
-           } else if (item.getItemId() == R.id.menu_talk) {
-               fragment = new BbsFragment();
-           } else if (item.getItemId() == R.id.menu_update) {
-               fragment = new UpdateFragment();
-           }
+            if (item.getItemId() == HOME_FRAGMENT) {
+                fragment = new HomeFragment();
+            } else if (item.getItemId() == R.id.menu_setting) {
+                fragment = new SettingFragment();
+            } else if (item.getItemId() == R.id.menu_collect) {
+                fragment = new CollectFragment();
+            } else if (item.getItemId() == R.id.menu_talk) {
+                fragment = new BbsFragment();
+            } else if (item.getItemId() == R.id.menu_update) {
+                fragment = new UpdateFragment();
+            }
 // 添加更多菜单项处理逻辑
 
-           // 获取当前显示的 Fragment
-           Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+            // 获取当前显示的 Fragment
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
 
-           // 检查当前 Fragment 是否已经是目标 Fragment
-           if (fragment != null && (currentFragment == null || !fragment.getClass().equals(currentFragment.getClass()))) {
-               getSupportFragmentManager().beginTransaction()
-                       .replace(R.id.content_frame, fragment)
-                       .addToBackStack(null)
-                       .commit();
-           }
+            // 检查当前 Fragment 是否已经是目标 Fragment
+            if (fragment != null && (currentFragment == null || !fragment.getClass().equals(currentFragment.getClass()))) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.content_frame, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            }
 
-           binding.drawerLayout.closeDrawer(GravityCompat.START);
-           return true;
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+            return true;
         });
 
         // 初始化悬浮搜索栏
         MaterialToolbar searchToolbar = findViewById(R.id.base_toolbar);
-
 
 
         // 设置悬浮搜索栏的导航按钮（返回键）点击事件
@@ -106,7 +111,13 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
                 binding.drawerLayout.openDrawer(GravityCompat.START);
             }
         });
-        if (LoginSPUtil.getInstance(this).get("access_token","null").equals("null")){
+
+    }
+
+    @Override
+    protected void updateUI() {
+        super.updateUI();
+        if (LoginSPUtil.getInstance(this).get("access_token", "null").equals("null")) {
             binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_data).setVisibility(View.GONE);
             binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_thumb).setVisibility(View.GONE);
             binding.navView.getHeaderView(0).findViewById(R.id.nav_header_no_login).setVisibility(View.VISIBLE);
@@ -117,24 +128,24 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                 }
             });
-        }else{
+        } else {
             binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_data).setVisibility(View.VISIBLE);
             binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_thumb).setVisibility(View.VISIBLE);
             binding.navView.getHeaderView(0).findViewById(R.id.nav_header_no_login).setVisibility(View.GONE);
-            TextView name= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_name);
-            TextView username=binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_username);
-            ImageView imageView= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_image);
-            TextView join= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_join);
-            TextView lostLogin= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_last_login);
-            TextView status= binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_status);
+            TextView name = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_name);
+            TextView username = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_username);
+            ImageView imageView = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_image);
+            TextView join = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_join);
+            TextView lostLogin = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_last_login);
+            TextView status = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_status);
 
-            status.setText(LoginSPUtil.getInstance(this).get("status","null"));
-            lostLogin.setText(DateUtil.FormatDate(LoginSPUtil.getInstance(this).get("lastLogin","null")));
-            join.setText(DateUtil.FormatDate(LoginSPUtil.getInstance(this).get("join","null")));
-            name.setText(LoginSPUtil.getInstance(this).get("username","null"));
-            username.setText(LoginSPUtil.getInstance(this).get("name","null"));
-            if (!LoginSPUtil.getInstance(this).get("thumb","null").equals("null")){
-                GlideUrl glideUrl = new GlideUrl("https://i.iwara.tv/image/avatar/"+LoginSPUtil.getInstance(this).get("thumb","null"), new LazyHeaders.Builder()
+            status.setText(LoginSPUtil.getInstance(this).get("status", "null"));
+            lostLogin.setText("最近登录为 "+DateUtil.formatAgo(LoginSPUtil.getInstance(this).get("lastLogin", "null")));
+            join.setText("首次加入为 "+DateUtil.formatAgo(LoginSPUtil.getInstance(this).get("join", "null")));
+            name.setText(LoginSPUtil.getInstance(this).get("username", "null"));
+            username.setText(LoginSPUtil.getInstance(this).get("name", "null"));
+            if (!LoginSPUtil.getInstance(this).get("thumb", "null").equals("null")) {
+                GlideUrl glideUrl = new GlideUrl("https://i.iwara.tv/image/avatar/" + LoginSPUtil.getInstance(this).get("thumb", "null"), new LazyHeaders.Builder()
                         .addHeader("User-Agent",
                                 "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 Edg/140.0.0.0")
                         .addHeader("Referer", "https://www.iwara.tv/")
@@ -148,7 +159,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
                         .circleCrop()
                         .error(R.mipmap.no_icon)
                         .into(imageView);
-            }else{
+            } else {
                 Glide.with(imageView.getContext())
                         .load(R.mipmap.no_icon)
                         .circleCrop()
@@ -165,10 +176,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
         }
     }
 
-    @Override
-    protected void updateUI() {
-        super.updateUI();
-    }
+
+
 
     @Override
     protected void initUI() {
