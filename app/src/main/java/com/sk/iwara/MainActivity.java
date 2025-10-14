@@ -55,7 +55,9 @@ import com.sk.iwara.ui.Update.UpdateFragment;
 import com.sk.iwara.ui.User.UserActivity;
 import com.sk.iwara.util.DateUtil;
 import com.sk.iwara.util.HttpUtil;
+import com.sk.iwara.util.LockScreenHelper;
 import com.sk.iwara.util.LoginSPUtil;
+import com.sk.iwara.util.SPUtil;
 import com.sk.iwara.util.ToastUtil;
 
 import java.util.HashMap;
@@ -68,6 +70,13 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
     @Override
     protected void init() {
 
+          // onCreate
+// helper.stop(); // onDestroy 记得注销
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            // 事务落盘后再拿当前 Fragment 对应的菜单 ID
+            int currentId = getCurrentFragmentId();
+            binding.navView.setCheckedItem(currentId);
+        });
         binding.navView.setNavigationItemSelectedListener(item -> {
             Fragment fragment = null;
 
@@ -181,6 +190,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
 
     @Override
     protected void initUI() {
+        if ( !SPUtil.getBoolean("office",false)){
+            ToastUtil.ToastUtil("您已打开办公模式",this);
+        }
         // 设置状态栏颜色
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = getWindow();
@@ -205,9 +217,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
         // 如果有 Fragment 在回退栈中，返回到上一个 Fragment
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();
-            // 同步选中项到当前 Fragment
-            int currentItemId = getCurrentFragmentId();
-            binding.navView.setCheckedItem(currentItemId);
+
         } else {
             // 如果回退栈为空，退出应用
             super.onBackPressed();

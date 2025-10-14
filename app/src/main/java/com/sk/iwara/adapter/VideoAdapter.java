@@ -21,6 +21,7 @@ import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.HomeVideoPayload;
 import com.sk.iwara.ui.Video.VideoActivity;
 import com.sk.iwara.ui.Video.VideoFragment;
+import com.sk.iwara.util.SPUtil;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -60,7 +61,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
         ImageView thumb=h.itemView.findViewById(R.id.card_user_thumb);
         TextView name=h.itemView.findViewById(R.id.card_user_name);
         TextView date=h.itemView.findViewById(R.id.card_date);
-        if (bean.getId()!=null){
+        if (bean.getId()!=null&& !SPUtil.getBoolean("office",false)){
             Glide.with(im.getContext())
                     .load(IWARA_API.IMAGE+"thumbnail/"+bean.getFile().getId()+"/thumbnail-"+String.format("%02d", bean.getThumbnail())+".jpg")
                     .error(R.mipmap.no_icon)

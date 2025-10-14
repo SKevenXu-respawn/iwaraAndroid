@@ -22,6 +22,7 @@ import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.HomeVideoPayload;
 import com.sk.iwara.ui.Video.VideoActivity;
 import com.sk.iwara.ui.Video.VideoFragment;
+import com.sk.iwara.util.SPUtil;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,7 +68,7 @@ public class SuggestVideoAdapter extends RecyclerView.Adapter<SuggestVideoAdapte
         TextView likes=h.itemView.findViewById(R.id.suggest_video_user_likes);
         views.setText(String.valueOf( bean.getNumViews()));
         likes.setText(String.valueOf(bean.getNumLikes()));
-        if (bean.getId()!=null){
+        if (bean.getId()!=null&& !SPUtil.getBoolean("office",false)){
             Glide.with(im.getContext())
                     .load(IWARA_API.IMAGE+"thumbnail/"+bean.getFile().getId()+"/thumbnail-"+String.format("%02d", bean.getThumbnail())+".jpg")
                     .error(R.mipmap.no_icon)

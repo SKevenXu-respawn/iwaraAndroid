@@ -1,5 +1,7 @@
 package com.sk.iwara.ui.Video;
 
+import android.util.Log;
+
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -25,15 +27,15 @@ public class VideoActivity extends BaseActivity<ActivityVideoBinding> {
 
     @Override
     public void onBackPressed() {
-//        // 先尝试让Fragment处理返回事件
-//        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
-//        if (fragment instanceof VideoFragment) {
-//            // 如果有多个fragment，先回到上一个
-//            if (fragmentManager.getBackStackEntryCount() > 1) {
-//                fragmentManager.popBackStack();
-//                return;
-//            }
-//        }
+        // 先尝试让Fragment处理返回事件
+        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+        if (fragment instanceof VideoFragment) {
+            // 如果有多个fragment，先回到上一个
+            Log.i("VideoActivity",fragmentManager.getBackStackEntryCount()+"");
+            if (fragmentManager.getBackStackEntryCount() == 1) {
+               finish();
+            }
+        }
         super.onBackPressed();
     }
     @Override
