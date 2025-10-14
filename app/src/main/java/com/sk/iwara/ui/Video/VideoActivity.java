@@ -25,24 +25,22 @@ public class VideoActivity extends BaseActivity<ActivityVideoBinding> {
 
     @Override
     public void onBackPressed() {
-        // 先尝试让Fragment处理返回事件
-        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
-        if (fragment instanceof VideoFragment) {
-            // 如果有多个fragment，先回到上一个
-            if (fragmentManager.getBackStackEntryCount() > 1) {
-                fragmentManager.popBackStack();
-                return;
-            }
-        }
+//        // 先尝试让Fragment处理返回事件
+//        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
+//        if (fragment instanceof VideoFragment) {
+//            // 如果有多个fragment，先回到上一个
+//            if (fragmentManager.getBackStackEntryCount() > 1) {
+//                fragmentManager.popBackStack();
+//                return;
+//            }
+//        }
         super.onBackPressed();
     }
     @Override
     protected void init() {
         fragmentManager = getSupportFragmentManager();
-
-        String videoUrl = getIntent().getStringExtra("video_url");
-
-            playVideo(videoUrl);
+        String videoUrl = getIntent().getBundleExtra("data").getString("id");
+        playVideo(videoUrl);
 
     }
 

@@ -35,7 +35,7 @@ public class SuggestFragment extends BaseFragment<FragmentSuggestBinding> {
                     public void onSuccess(String respBody) {
                         getActivity().runOnUiThread(()->{
                             HomeVideoPayload homeVideoPayload=new Gson().fromJson(respBody,HomeVideoPayload.class);
-                            adapter.addData(homeVideoPayload.getResults());
+                            adapter.addData(homeVideoPayload.getResults(),getActivity().getSupportFragmentManager());
                         });
 
                     }

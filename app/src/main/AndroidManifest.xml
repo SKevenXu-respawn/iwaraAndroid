@@ -30,7 +30,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.Video.VideoFragment"
+            android:name=".ui.Video.VideoActivity"
             android:theme="@style/AppTheme.NoActionBar.NonImmersive"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true">

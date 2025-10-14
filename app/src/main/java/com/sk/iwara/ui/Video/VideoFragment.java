@@ -48,7 +48,7 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
     public static VideoFragment newInstance(String videoUrl) {
         VideoFragment fragment = new VideoFragment();
         Bundle args = new Bundle();
-        args.putString("video_url", videoUrl);
+        args.putString("id", videoUrl);
         fragment.setArguments(args);
         return fragment;
     }
@@ -70,8 +70,10 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
 
     @Override
     protected void initData() {
-        Bundle bd=getActivity().getIntent().getBundleExtra("data");
-        id= bd.getString("id");
+        if (getArguments()==null){
+            return;
+        }
+        id= getArguments().getString("id");
         Log.d("VideoActivity",id);
         showLoading();
         HttpUtil.get().getAsync(IWARA_API.VIDEO+"/video/"+id, null,null, new HttpUtil.NetCallback() {

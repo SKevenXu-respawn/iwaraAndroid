@@ -19,6 +19,7 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.sk.iwara.R;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.HomeVideoPayload;
+import com.sk.iwara.ui.Video.VideoActivity;
 import com.sk.iwara.ui.Video.VideoFragment;
 
 import java.time.LocalDateTime;
@@ -99,7 +100,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
             @Override
             public void onClick(View view) {
                // Log.d("VideoAdapter",bean.)
-                Intent intent=new Intent(view.getContext(), VideoFragment.class);
+                Intent intent=new Intent(view.getContext(), VideoActivity.class);
                 Bundle bd=new Bundle();
                 bd.putString("id",bean.getId());
                 intent.putExtra("data",bd);
