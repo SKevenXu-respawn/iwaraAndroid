@@ -1,42 +1,22 @@
 package com.sk.iwara.base;
 
-import android.app.Activity;
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.TypedValue;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewbinding.ViewBinding;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.model.GlideUrl;
-import com.bumptech.glide.load.model.LazyHeaders;
-import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.navigation.NavigationView;
-import com.sk.iwara.MainActivity;
 import com.sk.iwara.R;
 
-import com.sk.iwara.ui.Login.LoginActivity;
-import com.sk.iwara.ui.User.UserActivity;
-import com.sk.iwara.ui.Video.VideoActivity;
-import com.sk.iwara.util.DateUtil;
 import com.sk.iwara.util.LoadingUtil;
-import com.sk.iwara.util.LoginSPUtil;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;

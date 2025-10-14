@@ -1,0 +1,318 @@
+package com.sk.iwara.ui.Video;
+
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.view.View;
+import android.widget.SeekBar;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.model.GlideUrl;
+import com.bumptech.glide.load.model.LazyHeaders;
+import com.google.android.exoplayer2.ExoPlayer;
+import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.Player;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.sk.iwara.R;
+import com.sk.iwara.api.IWARA_API;
+import com.sk.iwara.base.BaseActivity;
+import com.sk.iwara.base.BaseFragment;
+import com.sk.iwara.databinding.ActivityPlayBinding;
+import com.sk.iwara.payload.VideoDetailPayload;
+import com.sk.iwara.payload.VideoPlayListPayload;
+import com.sk.iwara.util.DateUtil;
+import com.sk.iwara.util.HttpUtil;
+import com.sk.iwara.util.PlayerSwipeSeek;
+import com.sk.iwara.util.PlayerUtil;
+
+import java.lang.reflect.Type;
+import java.util.List;
+
+public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
+    private ExoPlayer player;
+    private String id;
+    private boolean isFullScreen=false;
+
+    private Handler handler = new Handler(Looper.getMainLooper());
+    public static VideoFragment newInstance(String videoUrl) {
+        VideoFragment fragment = new VideoFragment();
+        Bundle args = new Bundle();
+        args.putString("video_url", videoUrl);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override public void onStop() {
+        super.onStop();
+
+        player.release();
+        binding.videoToolsSeekBar.removeCallbacks(progressRunnable);
+
+    }
+
+    @Override
+    protected void init() {
+        binding.videoToolsSeekBar.post(progressRunnable);
+
+
+    }
+
+    @Override
+    protected void initData() {
+        Bundle bd=getActivity().getIntent().getBundleExtra("data");
+        id= bd.getString("id");
+        Log.d("VideoActivity",id);
+        showLoading();
+        HttpUtil.get().getAsync(IWARA_API.VIDEO+"/video/"+id, null,null, new HttpUtil.NetCallback() {
+            @Override
+            public void onSuccess(String respBody) {
+                Log.d("VideoActivity",respBody);
+
+                VideoDetailPayload videoDetailPayload=new Gson().fromJson(respBody,VideoDetailPayload.class);
+
+                updateUI(videoDetailPayload);
+                HttpUtil.get().getAsync(videoDetailPayload.getFileUrl(), null, null,new HttpUtil.NetCallback() {
+                    @Override
+                    public void onSuccess(String respBody) {
+                        getActivity().runOnUiThread(()->{
+                            dismissLoading();
+                            Type listType = new TypeToken<List<VideoPlayListPayload>>(){}.getType();
+                            List<VideoPlayListPayload> videoPlayListPayloads = new Gson().fromJson(respBody, listType);
+                            String url = "https:"+videoPlayListPayloads.get(0).getSrc().getView();
+                            Log.d("VideoActivity",url);
+                            MediaItem item = MediaItem.fromUri(url);
+                            player.setMediaItem(item);
+                            player.prepare();
+                            player.play();
+                        });
+
+
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        dismissLoading();
+                        Log.d("VideoActivity",e.toString());
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                dismissLoading();
+                Log.d("VideoActivity",e.toString());
+            }
+        });
+
+    }
+    private void updateUI(VideoDetailPayload videoDetailPayload){
+
+
+        getActivity().runOnUiThread(()->{
+            // 1. 把值抛出去
+            binding.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override
+                public void onPageSelected(int position) {
+                    // 当用户滑到 0 或 1 时再发
+                    Bundle b = new Bundle();
+                    b.putString("data", new Gson().toJson(videoDetailPayload));
+                    getActivity(). getSupportFragmentManager().setFragmentResult("videoData", b);
+                }
+            });
+//            Bundle result = new Bundle();
+//            result.putString("data", new Gson().toJson(videoDetailPayload));
+//            getSupportFragmentManager().setFragmentResult("videoData", result);
+
+            VideoPagerAdapter adapter = new VideoPagerAdapter(getActivity());
+            binding.viewPager.setAdapter(adapter);
+
+            new TabLayoutMediator(binding.tabLayout, binding.viewPager,
+                    (tab, position) -> tab.setText(position == 0 ? "推荐视频" : "评论 "+videoDetailPayload.getNumComments())
+            ).attach();
+            binding.videoDetailTitle.setText(videoDetailPayload.getTitle());
+            binding.videoDetailJianjie.setText(videoDetailPayload.getBody());
+            binding.videoDetailUserName.setText(videoDetailPayload.getUser().getUsername());
+            binding.videoDetailUserUpdate.setText(DateUtil.formatAgo( videoDetailPayload.getFile().getUpdatedAt()));
+            binding.videoDetailLikesNum.setText(String.valueOf(videoDetailPayload.getNumLikes()) );
+            binding.videoDetailViewsNum.setText(String.valueOf(videoDetailPayload.getNumViews()));
+            if (videoDetailPayload.getUser().getAvatar()!=null){
+                GlideUrl glideUrl = new GlideUrl("https://i.iwara.tv/image/avatar/"+videoDetailPayload.getUser().getAvatar().getId()+"/"+videoDetailPayload.getUser().getAvatar().getName(), new LazyHeaders.Builder()
+                        .addHeader("User-Agent",
+                                "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36 Edg/140.0.0.0")
+                        .addHeader("Referer", "https://www.iwara.tv/")
+                        .addHeader("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+                        .addHeader("content-type", "image/jpeg")
+                        // 如果浏览器带了 Cookie 也加进来
+                        // .addHeader("Cookie", "session=xxx")
+                        .build());
+                Glide.with(this)
+                        .load(glideUrl)
+                        .circleCrop()
+                        .error(R.mipmap.logo)
+                        .into(binding.videoDetailUserThumb);
+            }else{
+                Glide.with(binding.videoDetailUserThumb.getContext())
+                        .load(R.mipmap.no_icon)
+                        .circleCrop()
+                        .error(R.mipmap.no_icon)
+                        .into(binding.videoDetailUserThumb);
+            }
+
+        });
+
+    }
+    @Override
+    protected void initUI() {
+        player = PlayerUtil.createCachedPlayer(getActivity());
+        binding.playerView.setPlayer(player);
+        new PlayerSwipeSeek().setOnClickListener(this::toggleControl).attach(binding.playerView);
+        binding.videoToolsTogglePlay.setOnClickListener(v -> {
+            player.setPlayWhenReady(!player.getPlayWhenReady());
+
+        });
+        binding.videoToolsTurn.setOnClickListener(v->toggleFullScreen());
+        updatePlayBtn();
+        binding.videoToolsBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+        player.addListener(new Player.Listener() {
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                // 播放器自己状态变了（包括缓冲完、缓冲中、用户点击、自动播放下一个）
+                updatePlayBtn();
+            }
+        });
+        binding.videoToolsSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            private long newPosition;   // 记住用户拖到的位置
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    long duration = player.getDuration();
+                    if (duration > 0) {
+                        newPosition = duration * progress / 100;
+                        // 只更新文字，不 setProgress（否则自己改自己）
+                        binding.videoToolsSeekTime.setText(
+                                formatTime(newPosition) + "/" + formatTime(duration));
+                    }
+                }
+            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                player.seekTo(newPosition);   // 关键：真正跳转
+            }
+        });
+
+        handler.post(progressRunnable);
+    }
+
+    public void onBackPressed() {
+        if (isFullScreen){
+            toggleFullScreen();
+        }else{
+            super.getActivity().onBackPressed();
+        }
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (player != null) player.setPlayWhenReady(false);
+    }
+
+    /* 7. 进度条 1 秒刷新一次 */
+    private final Runnable progressRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (player == null) return;
+            long current = player.getCurrentPosition();
+            long duration = player.getDuration();
+            int progress = duration > 0 ? (int)(current * 100 / duration) : 0;
+
+            binding.videoToolsSeekBar.setProgress(progress);
+            binding.videoToolsSeekTime.setText(
+                    formatTime(current) + "/" + formatTime(duration));
+            binding.videoToolsSeekBar.postDelayed(this, 1000);
+        }
+    };
+    /* 8. 工具：更新图标 */
+    private void updatePlayBtn() {
+        Glide.with(this).load(player.getPlayWhenReady()
+                ? R.mipmap.play
+                : R.mipmap.pause).into(binding.videoToolsTogglePlay);
+
+    }
+    private void toggleControl() {
+        binding.videoToolsTop.setVisibility(
+                binding.videoToolsTop.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+        binding.videoToolsBottom.setVisibility(
+                binding.videoToolsBottom.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE);
+    }
+
+    private String formatTime(long ms) {
+        long s = ms / 1000;
+        long h = s / 3600, m = (s % 3600) / 60, sec = s % 60;
+        return h > 0 ? String.format("%02d:%02d:%02d", h, m, sec)
+                : String.format("%02d:%02d", m, sec);
+    }
+    public class VideoPagerAdapter extends FragmentStateAdapter {
+        public VideoPagerAdapter(@NonNull FragmentActivity fa) { super(fa); }
+
+        @NonNull
+        @Override
+        public Fragment createFragment(int position) {
+            return position == 0 ? new SuggestFragment() : new TalkFragment();
+        }
+
+        @Override
+        public int getItemCount() { return 2; }
+    }
+    private void toggleFullScreen() {
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+            // 可以在这里进行一些全屏状态下的布局调整等操作
+           binding.videoTextView.setVisibility(View.GONE);
+            hideSystemUI();
+            toggleControl();
+            isFullScreen=true;
+        } else {
+            getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            binding.videoTextView.setVisibility(View.VISIBLE);
+            showSystemUI();
+            toggleControl();
+            isFullScreen=false;
+        }
+    }
+    private void hideSystemUI() {
+        View decorView = getActivity().getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        | View.SYSTEM_UI_FLAG_FULLSCREEN
+                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    }
+    private void showSystemUI() {
+        View decorView = getActivity().getWindow().getDecorView();
+        decorView.setSystemUiVisibility(
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+    }
+}

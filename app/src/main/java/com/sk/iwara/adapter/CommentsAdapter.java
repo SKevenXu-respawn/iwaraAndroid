@@ -1,8 +1,5 @@
 package com.sk.iwara.adapter;
 
-import android.content.Intent;
-import android.media.Image;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,24 +8,18 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.sk.iwara.R;
-import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.CommentsPayload;
-import com.sk.iwara.payload.HomeVideoPayload;
-import com.sk.iwara.ui.Video.VideoActivity;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.transform.Result;
 
 public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Holder> {
     private List<CommentsPayload.Results> list = new ArrayList<>();

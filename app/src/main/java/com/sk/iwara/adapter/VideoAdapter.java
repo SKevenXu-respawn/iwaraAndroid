@@ -1,7 +1,6 @@
 package com.sk.iwara.adapter;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,14 +19,12 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.sk.iwara.R;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.HomeVideoPayload;
-import com.sk.iwara.ui.Video.VideoActivity;
+import com.sk.iwara.ui.Video.VideoFragment;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.transform.Result;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
     private List<HomeVideoPayload.Results> list = new ArrayList<>();
@@ -102,7 +99,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
             @Override
             public void onClick(View view) {
                // Log.d("VideoAdapter",bean.)
-                Intent intent=new Intent(view.getContext(), VideoActivity.class);
+                Intent intent=new Intent(view.getContext(), VideoFragment.class);
                 Bundle bd=new Bundle();
                 bd.putString("id",bean.getId());
                 intent.putExtra("data",bd);
