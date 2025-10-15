@@ -32,7 +32,7 @@ public class LoginSPUtil {
             put("status",status);
             put("token",token);
             put("access_token",access_token);
-            if (thumb.isEmpty()){
+            if (thumb==null){
                 put("thumb","null");
             }else{
                 put("thumb",thumb);

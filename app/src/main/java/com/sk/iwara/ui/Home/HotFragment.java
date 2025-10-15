@@ -91,8 +91,15 @@ public class HotFragment extends BaseFragment<FragmentHotBinding> {
 
             @Override
             public void onFailure(Exception e) {
-                ToastUtil.ToastUtil(e.getMessage(), getActivity());
-                binding.getRoot().setRefreshing(false);
+
+                if (binding.getRoot()!=null){
+                    getActivity().runOnUiThread(()->{
+                        ToastUtil.ToastUtil(e.getMessage(), getActivity());
+                        binding.getRoot().setRefreshing(false);
+                    });
+
+                }
+
             }
         });
     }

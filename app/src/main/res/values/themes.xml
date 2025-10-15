@@ -23,6 +23,10 @@
         <!-- 四个角全部 0dp，即直角 -->
         <item name="cornerSize">0dp</item>
     </style>
+
+
+
+
     <!-- 正常黑白状态栏 + 无标题栏 -->
     <style name="AppTheme.NoActionBar.NonImmersive" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- 状态栏颜色：黑/白跟随系统 -->
@@ -32,4 +36,7 @@
         <!-- 确保不沉浸式 -->
         <item name="android:windowFullscreen">false</item>
     </style>
+
+
+
 </resources>

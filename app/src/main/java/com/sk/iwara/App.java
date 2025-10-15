@@ -29,6 +29,7 @@ public class App extends Application {
                 new StandaloneDatabaseProvider(this));
         VideoTask.video=new ArrayList<>();
 
-
+        SPUtil.init(this,"Config");
+        
     }
 }

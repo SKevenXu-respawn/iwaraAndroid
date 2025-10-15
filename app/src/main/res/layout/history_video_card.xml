@@ -13,18 +13,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <androidx.cardview.widget.CardView
-            android:id="@+id/suggest_video_card"
+            android:id="@+id/history_video_card"
             android:layout_width="150dp"
             app:cardCornerRadius="15dp"
             app:cardElevation="0dp"
             android:layout_height="100dp">
             <ImageView
-                android:id="@+id/suggest_video_image"
+                android:id="@+id/history_video_image"
                 android:layout_width="match_parent"
                 android:scaleType="fitCenter"
                 android:layout_height="match_parent"/>
             <TextView
-                android:id="@+id/suggest_video_length"
+                android:id="@+id/history_video_length"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
@@ -39,7 +39,7 @@
             android:paddingStart="8dp"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/suggest_video_title"
+                android:id="@+id/history_video_title"
                 android:layout_width="match_parent"
                 android:textSize="16dp"
                 android:maxLines="2"
@@ -53,17 +53,26 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
                 android:orientation="vertical">
+                <TextView
+                    android:id="@+id/history_video_num"
+                    android:layout_width="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#777777"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:layout_height="wrap_content"/>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:orientation="horizontal">
                     <ImageView
-                        android:id="@+id/suggest_video_user_thumb"
+                        android:id="@+id/history_video_user_thumb"
                         android:layout_width="30dp"
                         android:layout_height="30dp"/>
                     <TextView
-                        android:id="@+id/suggest_video_user_name"
+                        android:id="@+id/history_video_user_name"
                         android:layout_width="wrap_content"
                         android:textSize="12dp"
                         android:maxLines="1"
@@ -74,58 +83,7 @@
                         android:text=""
                         android:layout_height="wrap_content"/>
                 </LinearLayout>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:layout_gravity="bottom"
-                    android:orientation="horizontal">
-                    <LinearLayout
-                        android:layout_weight="1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:layout_width="30dp"
-                            android:layout_height="30dp"
-                            android:backgroundTint="#5A5858"
-                            android:background="@mipmap/views"/>
-                        <TextView
-                            android:id="@+id/suggest_video_user_views"
-                            android:layout_width="match_parent"
-                            android:textSize="12dp"
-                            android:textColor="#5A5858"
-                            android:maxLines="1"
-                            android:ellipsize="end"
-                            android:layout_height="wrap_content"/>
-                    </LinearLayout>
-                    <LinearLayout
-                        android:layout_weight="1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:layout_width="30dp"
-                            android:backgroundTint="#5A5858"
-                            android:background="@mipmap/like"
-                            android:layout_height="30dp"/>
 
-                        <TextView
-                            android:id="@+id/suggest_video_user_likes"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:ellipsize="end"
-                            android:maxLines="1"
-                            android:textColor="#5A5858"
-                            android:textSize="12dp" />
-                    </LinearLayout>
-
-
-                </LinearLayout>
             </LinearLayout>
 
         </FrameLayout>

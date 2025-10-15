@@ -19,22 +19,27 @@ public class DateUtil {
         }
     }
     public static String formatAgo(String iso8601) {
-        Instant instant = Instant.parse(iso8601);
-        ZonedDateTime time = instant.atZone(ZoneId.systemDefault());
-        ZonedDateTime now = ZonedDateTime.now();
+        try{
+            Instant instant = Instant.parse(iso8601);
+            ZonedDateTime time = instant.atZone(ZoneId.systemDefault());
+            ZonedDateTime now = ZonedDateTime.now();
 
-        long days    = ChronoUnit.DAYS.between(time, now);
-        long hours   = ChronoUnit.HOURS.between(time, now);
-        long minutes = ChronoUnit.MINUTES.between(time, now);
+            long days    = ChronoUnit.DAYS.between(time, now);
+            long hours   = ChronoUnit.HOURS.between(time, now);
+            long minutes = ChronoUnit.MINUTES.between(time, now);
 
-        StringBuilder sb = new StringBuilder();
-        if (days > 0) {
-            sb.append(days).append("天");
-        } else if (hours > 0) {
-            sb.append(hours).append("小时");
-        } else {
-            sb.append(Math.max(1, minutes)).append("分钟"); // 不足1分钟按1分钟算
+            StringBuilder sb = new StringBuilder();
+            if (days > 0) {
+                sb.append(days).append("天");
+            } else if (hours > 0) {
+                sb.append(hours).append("小时");
+            } else {
+                sb.append(Math.max(1, minutes)).append("分钟"); // 不足1分钟按1分钟算
+            }
+            return sb.append("前").toString();
+        } catch (Exception e) {
+            return iso8601;
         }
-        return sb.append("前").toString();
+
     }
 }

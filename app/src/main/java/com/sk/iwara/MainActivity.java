@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import android.content.Context;
@@ -33,6 +34,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.sk.iwara.adapter.MenuAdapter;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.base.BaseActivity;
 import com.sk.iwara.databinding.ActivityMainBinding;
@@ -43,6 +45,7 @@ import com.sk.iwara.payload.UserPayload;
 import com.sk.iwara.ui.Bbs.BbsFragment;
 
 import com.sk.iwara.ui.Collect.CollectFragment;
+import com.sk.iwara.ui.History.HistoryFragment;
 import com.sk.iwara.ui.Home.HomeFragment;
 import com.sk.iwara.ui.Home.HotFragment;
 import com.sk.iwara.ui.Home.NewFragment;
@@ -57,6 +60,7 @@ import com.sk.iwara.util.DateUtil;
 import com.sk.iwara.util.HttpUtil;
 import com.sk.iwara.util.LockScreenHelper;
 import com.sk.iwara.util.LoginSPUtil;
+import com.sk.iwara.util.LoginUtil;
 import com.sk.iwara.util.SPUtil;
 import com.sk.iwara.util.ToastUtil;
 
@@ -66,7 +70,7 @@ import java.util.Map;
 
 public class MainActivity extends BaseActivity<ActivityMainBinding> {
     private static final int HOME_FRAGMENT = R.id.menu_video;
-
+    private MenuAdapter adapter;
     @Override
     protected void init() {
 
@@ -75,38 +79,9 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             // 事务落盘后再拿当前 Fragment 对应的菜单 ID
             int currentId = getCurrentFragmentId();
-            binding.navView.setCheckedItem(currentId);
+            adapter.setCheckedItem(currentId);
         });
-        binding.navView.setNavigationItemSelectedListener(item -> {
-            Fragment fragment = null;
 
-            if (item.getItemId() == HOME_FRAGMENT) {
-                fragment = new HomeFragment();
-            } else if (item.getItemId() == R.id.menu_setting) {
-                fragment = new SettingFragment();
-            } else if (item.getItemId() == R.id.menu_collect) {
-                fragment = new CollectFragment();
-            } else if (item.getItemId() == R.id.menu_talk) {
-                fragment = new BbsFragment();
-            } else if (item.getItemId() == R.id.menu_update) {
-                fragment = new UpdateFragment();
-            }
-// 添加更多菜单项处理逻辑
-
-            // 获取当前显示的 Fragment
-            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
-
-            // 检查当前 Fragment 是否已经是目标 Fragment
-            if (fragment != null && (currentFragment == null || !fragment.getClass().equals(currentFragment.getClass()))) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.content_frame, fragment)
-                        .addToBackStack(null)
-                        .commit();
-            }
-
-            binding.drawerLayout.closeDrawer(GravityCompat.START);
-            return true;
-        });
 
         // 初始化悬浮搜索栏
         MaterialToolbar searchToolbar = findViewById(R.id.base_toolbar);
@@ -127,10 +102,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
     protected void updateUI() {
         super.updateUI();
         if (LoginSPUtil.getInstance(this).get("access_token", "null").equals("null")) {
-            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_data).setVisibility(View.GONE);
-            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_thumb).setVisibility(View.GONE);
-            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_no_login).setVisibility(View.VISIBLE);
-            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_no_login).setOnClickListener(new View.OnClickListener() {
+            binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_login_data).setVisibility(View.GONE);
+            binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_login_thumb).setVisibility(View.GONE);
+            binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_no_login).setVisibility(View.VISIBLE);
+            binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_no_login).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     LoginSPUtil.getInstance(MainActivity.this).clear();
@@ -138,15 +113,16 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
                 }
             });
         } else {
-            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_data).setVisibility(View.VISIBLE);
-            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_login_thumb).setVisibility(View.VISIBLE);
-            binding.navView.getHeaderView(0).findViewById(R.id.nav_header_no_login).setVisibility(View.GONE);
-            TextView name = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_name);
-            TextView username = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_username);
-            ImageView imageView = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_image);
-            TextView join = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_join);
-            TextView lostLogin = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_last_login);
-            TextView status = binding.navView.getHeaderView(0).findViewById(R.id.nav_header_user_status);
+
+            binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_login_data).setVisibility(View.VISIBLE);
+            binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_login_thumb).setVisibility(View.VISIBLE);
+            binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_no_login).setVisibility(View.GONE);
+            TextView name = binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_user_name);
+            TextView username = binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_user_username);
+            ImageView imageView = binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_user_image);
+            TextView join = binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_user_join);
+            TextView lostLogin = binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_user_last_login);
+            TextView status = binding.navView.findViewById(R.id.nav_header).findViewById(R.id.nav_header_user_status);
 
             status.setText(LoginSPUtil.getInstance(this).get("status", "null"));
             lostLogin.setText("最近登录为 "+DateUtil.formatAgo(LoginSPUtil.getInstance(this).get("lastLogin", "null")));
@@ -175,7 +151,7 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
                         .error(R.mipmap.no_icon)
                         .into(imageView);
             }
-            binding.navView.getHeaderView(0).setOnClickListener(new View.OnClickListener() {
+            binding.navView.findViewById(R.id.nav_header).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     startActivity(new Intent(MainActivity.this, UserActivity.class));
@@ -186,7 +162,20 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
     }
 
 
+    @Override
+    protected void updateData() {
+        super.updateData();
+        LoginUtil.checkIsLogin(this, new LoginUtil.LoginCallBack() {
+            @Override
+            public void status(boolean isLogin,String name) {
+                if (isLogin){
+                    runOnUiThread(()->ToastUtil.ToastUtil("欢迎回来，"+name,MainActivity.this));
+                }
 
+            }
+        });
+
+    }
 
     @Override
     protected void initUI() {
@@ -200,7 +189,40 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(Color.parseColor("#FFFFFF")); // 设置状态栏颜色
         }
-        binding.navView.setCheckedItem(R.id.menu_video);
+        adapter=new MenuAdapter(this, item -> {
+            Fragment fragment = null;
+
+            if (item.getId() == HOME_FRAGMENT) {
+                fragment = new HomeFragment();
+            } else if (item.getId() == R.id.menu_setting) {
+                fragment = new SettingFragment();
+            } else if (item.getId() == R.id.menu_collect) {
+                fragment = new CollectFragment();
+            } else if (item.getId() == R.id.menu_talk) {
+                fragment = new BbsFragment();
+            } else if (item.getId() == R.id.menu_update) {
+                fragment = new UpdateFragment();
+            }else if (item.getId() == R.id.menu_history) {
+                fragment = new HistoryFragment();
+            }
+// 添加更多菜单项处理逻辑
+
+            // 获取当前显示的 Fragment
+            Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.content_frame);
+
+            // 检查当前 Fragment 是否已经是目标 Fragment
+            if (fragment != null && (currentFragment == null || !fragment.getClass().equals(currentFragment.getClass()))) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.content_frame, fragment)
+                        .addToBackStack(null)
+                        .commit();
+            }
+
+            binding.drawerLayout.closeDrawer(GravityCompat.START);
+        });
+        binding.navRecycle.setLayoutManager(new LinearLayoutManager(this));
+        binding.navRecycle.setAdapter(adapter);
+        adapter.setCheckedItem(R.id.menu_video);
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.content_frame, new HomeFragment())
@@ -236,6 +258,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
             return R.id.menu_talk;
         } else if (currentFragment instanceof UpdateFragment) {
             return R.id.menu_update;
+        } else if (currentFragment instanceof HistoryFragment) {
+            return R.id.menu_history;
         }
         return R.id.menu_video; // 默认返回首页
     }

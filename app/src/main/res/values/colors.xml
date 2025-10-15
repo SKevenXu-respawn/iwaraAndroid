@@ -1,7 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 基础 -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="select_blue">#9F0049B8</color>
+    <color name="bg">#F4F4F4</color>
 
+    <!-- 导航专用 -->
+    <color name="select_blue">#FF0049B8</color>      <!-- 选中条 & 文字 -->
+    <color name="nav_text_normal">#FF757575</color>  <!-- 未选中文字/图标 -->
+    <color name="nav_item_bg">#00FFFFFF</color>      <!-- item 背景（透明） -->
+    <color name="divider">#1F000000</color>         <!-- 分割线 12% 黑 -->
+    <color name="nav_text">#FF777777</color>      <!-- 未选中文字/图标 -->
+    <color name="nav_text_selected">#FF0049B8</color> <!-- 选中文字/图标 -->
+    <color name="nav_divider">#FF777777</color>   <!-- 分割线 -->
+    <color name="nav_indicator">#FF777777</color> <!-- 高亮条（灰色） -->
 </resources>

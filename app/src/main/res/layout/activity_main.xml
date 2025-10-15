@@ -26,6 +26,7 @@
                 app:queryHint="搜索内容"
                 app:iconifiedByDefault="true"
                 />
+
         </com.google.android.material.appbar.MaterialToolbar>
 
         <!-- 内容区域 -->
@@ -38,13 +39,19 @@
     </RelativeLayout>
 
     <!-- 侧边栏 -->
-    <com.google.android.material.navigation.NavigationView
+    <LinearLayout
         android:id="@+id/nav_view"
         android:layout_width="350dp"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        app:headerLayout="@layout/nav_header"
-        app:menu="@menu/nav_menu"
-        android:background="@drawable/bg_drawer_white"
-        app:shapeAppearance="@style/ShapeAppearance.Drawer.White" />
+        android:elevation="5dp"
+        android:orientation="vertical"
+        android:background="#F4F4F4"
+        android:layout_gravity="start">
+        <include android:id="@+id/nav_header" layout="@layout/nav_header"/>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/nav_recycle"
+            android:paddingTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
 </androidx.drawerlayout.widget.DrawerLayout>
