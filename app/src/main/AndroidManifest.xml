@@ -45,7 +45,11 @@
             android:theme="@style/AppTheme.NoActionBar.NonImmersive"
             android:exported="true">
         </activity>
-
+        <activity
+            android:name=".ui.Search.SearchActivity"
+            android:theme="@style/AppTheme.NoActionBar.NonImmersive"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>

@@ -2,9 +2,12 @@ package com.sk.iwara;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
@@ -22,7 +25,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.GridLayout;
 import android.widget.ImageView;
-import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -34,6 +36,7 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.sk.iwara.ViewModel.LoginViewModel;
 import com.sk.iwara.adapter.MenuAdapter;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.base.BaseActivity;
@@ -52,6 +55,7 @@ import com.sk.iwara.ui.Home.NewFragment;
 import com.sk.iwara.ui.Home.PopularFragment;
 import com.sk.iwara.ui.Login.LoginActivity;
 
+import com.sk.iwara.ui.Search.SearchActivity;
 import com.sk.iwara.ui.Settings.SettingFragment;
 
 import com.sk.iwara.ui.Update.UpdateFragment;
@@ -71,9 +75,11 @@ import java.util.Map;
 public class MainActivity extends BaseActivity<ActivityMainBinding> {
     private static final int HOME_FRAGMENT = R.id.menu_video;
     private MenuAdapter adapter;
+    // ① 登录状态 LiveData（生命周期感知）
+    private LoginViewModel loginViewModel;
     @Override
     protected void init() {
-
+        loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
           // onCreate
 // helper.stop(); // onDestroy 记得注销
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
@@ -95,7 +101,20 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
                 binding.drawerLayout.openDrawer(GravityCompat.START);
             }
         });
+        binding.baseSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                Intent intent=new Intent(MainActivity.this, SearchActivity.class);
+                intent.putExtra("query",query);
+                startActivity(intent);
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -169,7 +188,10 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
             @Override
             public void status(boolean isLogin,String name) {
                 if (isLogin){
+                    loginViewModel.setLogin(isLogin);
                     runOnUiThread(()->ToastUtil.ToastUtil("欢迎回来，"+name,MainActivity.this));
+                }else{
+                    loginViewModel.setLogin(isLogin);
                 }
 
             }

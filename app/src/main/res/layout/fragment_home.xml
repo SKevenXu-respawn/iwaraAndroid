@@ -18,8 +18,8 @@
             android:layout_height="wrap_content"
             android:background="@color/white"
             app:tabTextColor="@android:color/black"
-            app:tabMode="fixed"
-            app:tabGravity="fill" />
+            app:tabMode="auto"
+            app:tabGravity="center" />
 
         <!-- 3. 内容区 -->
         <androidx.viewpager2.widget.ViewPager2

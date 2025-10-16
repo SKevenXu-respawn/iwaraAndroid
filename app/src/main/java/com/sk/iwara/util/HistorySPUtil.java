@@ -16,7 +16,7 @@ import java.util.List;
  * Created by 25140 on 2025/10/15 .
  */
 public class HistorySPUtil {
-    public class HistoryItem {
+    public static class HistoryItem {
         public String id;      // 业务 id
         public String title;
         public int num;
