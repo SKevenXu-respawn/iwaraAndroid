@@ -96,7 +96,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
                     .into(thumb);
         }
         name.setText(bean.getUser().getUsername());
-        date.setText(FormatDate(bean.getFile().getUpdatedAt()));
+        if (bean.getFile()!=null){
+            date.setText(FormatDate(bean.getFile().getUpdatedAt()));
+        }
+
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

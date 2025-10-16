@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -61,6 +62,21 @@ public class SearchActivity extends BaseActivity<FragmentSearchBinding> {
                 getData();
             }
         });
+        binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    fromat=   URLEncoder.encode(query, StandardCharsets.UTF_8);
+                }
+                getData();
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -96,7 +112,7 @@ public class SearchActivity extends BaseActivity<FragmentSearchBinding> {
             binding.getRoot().setRefreshing(true);
         });
 
-        HttpUtil.get().getAsync(IWARA_API.VIDEO+"search?type=videos&page=0&query="+fromat, null,map, new HttpUtil.NetCallback() {
+        HttpUtil.get().getAsync(IWARA_API.VIDEO+"/search?type=videos&page=0&query="+fromat, null,map, new HttpUtil.NetCallback() {
             @Override
             public void onSuccess(String respBody) {
                 runOnUiThread(()->{

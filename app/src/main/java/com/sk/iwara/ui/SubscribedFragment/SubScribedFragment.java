@@ -1,20 +1,16 @@
-package com.sk.iwara.ui.Home;
+package com.sk.iwara.ui.SubscribedFragment;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.gson.Gson;
-import com.sk.iwara.MainActivity;
 import com.sk.iwara.adapter.VideoAdapter;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.base.BaseFragment;
-import com.sk.iwara.databinding.FragmentPopularBinding;
 import com.sk.iwara.databinding.FragmentSubscribedBinding;
 import com.sk.iwara.payload.HomeVideoPayload;
-import com.sk.iwara.util.GridUtil;
 import com.sk.iwara.util.HttpUtil;
 import com.sk.iwara.util.LoginSPUtil;
 import com.sk.iwara.util.ToastUtil;
@@ -82,8 +78,15 @@ public class SubScribedFragment extends BaseFragment<FragmentSubscribedBinding> 
 
             @Override
             public void onFailure(Exception e) {
-                ToastUtil.ToastUtil(e.getMessage(), getActivity());
-                binding.getRoot().setRefreshing(false);
+                if (requireActivity()!=null){
+                    requireActivity().runOnUiThread(()->{
+
+                        ToastUtil.ToastUtil(e.getMessage(), requireActivity());
+                        binding.getRoot().setRefreshing(false);
+                    });
+
+                }
+
             }
         });
     }

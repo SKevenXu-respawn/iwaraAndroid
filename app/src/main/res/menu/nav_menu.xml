@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
         <item android:id="@+id/menu_video"  android:title="视频" android:icon="@mipmap/video" android:iconTint="#F4F4F4"/>
-        <item android:id="@+id/menu_collect" android:title="收藏" android:icon="@mipmap/collect" android:iconTint="#F4F4F4"/>
+
         <item android:id="@+id/menu_history" android:title="历史记录" android:icon="@mipmap/history" android:iconTint="#F4F4F4"/>
-        <item android:id="@+id/menu_talk" android:title="论坛" android:icon="@mipmap/bbs" android:iconTint="#F4F4F4"/>
+
         <item android:id="@+id/menu_update" android:title="更新" android:icon="@mipmap/update" android:iconTint="#F4F4F4" />
         <item android:id="@+id/menu_setting" android:title="设置" android:icon="@mipmap/setting" android:iconTint="#F4F4F4"/>
     </group>

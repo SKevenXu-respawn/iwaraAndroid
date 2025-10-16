@@ -47,6 +47,7 @@ public final class HttpUtil {
                 .headers(Headers.of(defaultHeaders(headers))); // 允许空
         Request request = rb.build();
         Call call = client.newCall(request);
+        Log.d("HttpUtil",new Gson().toJson(request));
         call.enqueue(new CallbackAdapter(callback));
         return call;   // 外部可 cancel()
     }

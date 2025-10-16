@@ -14,8 +14,11 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -58,6 +61,7 @@ import com.sk.iwara.ui.Login.LoginActivity;
 import com.sk.iwara.ui.Search.SearchActivity;
 import com.sk.iwara.ui.Settings.SettingFragment;
 
+import com.sk.iwara.ui.SubscribedFragment.SubScribedFragment;
 import com.sk.iwara.ui.Update.UpdateFragment;
 import com.sk.iwara.ui.User.UserActivity;
 import com.sk.iwara.util.DateUtil;
@@ -184,14 +188,25 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
     @Override
     protected void updateData() {
         super.updateData();
+        Log.d("MainActivity","onUpdate");
         LoginUtil.checkIsLogin(this, new LoginUtil.LoginCallBack() {
             @Override
             public void status(boolean isLogin,String name) {
                 if (isLogin){
                     loginViewModel.setLogin(isLogin);
                     runOnUiThread(()->ToastUtil.ToastUtil("欢迎回来，"+name,MainActivity.this));
+                    if (adapter.getItemId(2)!=10001){
+                        Resources res = getResources();
+                        adapter.insertItem(2,new MenuAdapter.MenuItemBean(10001,"订阅",new BitmapDrawable(res, BitmapFactory.decodeResource(res, R.mipmap.back))));
+                        adapter.insertItem(3,new MenuAdapter.MenuItemBean(10002,"收藏",new BitmapDrawable(res, BitmapFactory.decodeResource(res, R.mipmap.collect))));
+                        adapter.insertItem(4,new MenuAdapter.MenuItemBean(10003,"论坛",new BitmapDrawable(res, BitmapFactory.decodeResource(res, R.mipmap.bbs))));
+                    }
+                    Log.d("MainActivity","login");
                 }else{
                     loginViewModel.setLogin(isLogin);
+                    adapter.removeItemForId(10001,10002,10003);
+                    Log.d("MainActivity","logout");
+
                 }
 
             }
@@ -218,14 +233,16 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
                 fragment = new HomeFragment();
             } else if (item.getId() == R.id.menu_setting) {
                 fragment = new SettingFragment();
-            } else if (item.getId() == R.id.menu_collect) {
+            } else if (item.getId() == 10002) {
                 fragment = new CollectFragment();
-            } else if (item.getId() == R.id.menu_talk) {
+            } else if (item.getId() == 10003) {
                 fragment = new BbsFragment();
             } else if (item.getId() == R.id.menu_update) {
                 fragment = new UpdateFragment();
             }else if (item.getId() == R.id.menu_history) {
                 fragment = new HistoryFragment();
+            } else if (item.getId() == 10001) {
+                fragment = new SubScribedFragment();   // ← 跳转到订阅 Fragment
             }
 // 添加更多菜单项处理逻辑
 
@@ -275,13 +292,15 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
         } else if (currentFragment instanceof SettingFragment) {
             return R.id.menu_setting;
         } else if (currentFragment instanceof CollectFragment) {
-            return R.id.menu_collect;
+            return 10002;
         } else if (currentFragment instanceof BbsFragment) {
-            return R.id.menu_talk;
+            return 10003;
         } else if (currentFragment instanceof UpdateFragment) {
             return R.id.menu_update;
         } else if (currentFragment instanceof HistoryFragment) {
             return R.id.menu_history;
+        }else if (currentFragment instanceof SubScribedFragment) {
+            return 10001;
         }
         return R.id.menu_video; // 默认返回首页
     }

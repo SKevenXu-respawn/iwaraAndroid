@@ -73,13 +73,73 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.Holder> {
             setCheckedItem(item.id);
         });
     }
+    public void insertItem(int position, MenuItemBean item) {
+        if (position < 0 || position > data.size()) return;
 
+        // 1. 数据层插入
+        data.add(position, item);
+        // 2. 刷新 UI（带动画）
+        notifyItemInserted(position);
+
+        // 3. 如果插入位置 <= 当前选中位置，要把 checkedId 往后挪一位，避免高亮错位
+        if (position <= indexOfCheckedItem()) {
+            checkedId = item.id;   // 让新插入项自动高亮（可按需调整）
+        }
+    }
+    public void removeItem(int position) {
+        if (position < 0 || position > data.size()) return;
+
+        // 1. 数据层插入
+        data.remove(position);
+
+
+    }
+    /**
+     * 根据动态 id 列表移除菜单项（可多个）
+     * @param ids 可变参数，支持一次传多个 id
+     */
+    public void removeItemForId(int... ids) {
+        if (ids == null || ids.length == 0) return;
+
+        // 倒序删除，避免索引错位
+        for (int i = data.size() - 1; i >= 0; i--) {
+            int currentId = data.get(i).id;
+            for (int id : ids) {
+                if (currentId == id) {
+                    data.remove(i);
+                    notifyItemRemoved(i);
+
+                    // 修正高亮：如果被删的是当前选中，清空选中
+                    if (id == checkedId) {
+                        checkedId = -1;
+                        notifyItemChanged(i); // 刷新被删位置，去掉高亮
+                    }
+                    break; // 一个 id 只删一次
+                }
+            }
+        }
+    }
+
+    /**
+     * 查找当前选中项在列表中的 index（辅助方法）
+     */
+    private int indexOfCheckedItem() {
+        for (int i = 0; i < data.size(); i++) {
+            if (data.get(i).id == checkedId) return i;
+        }
+        return -1;
+    }
     @Override public int getItemCount() { return data.size(); }
-    public class MenuItemBean {
+    public static class MenuItemBean {
         public int    id;      // item id
         public String title;   // title
         public Drawable image;
-
+        public MenuItemBean(int id,String title,Drawable image){
+            this.image=image;
+            this.id=id;
+            this.title=title;
+        }
+        public MenuItemBean(){}
         public Drawable getImage() {
             return image;
         }
