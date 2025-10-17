@@ -28,7 +28,11 @@ public class SuggestFragment extends BaseFragment<FragmentSuggestBinding> {
                 String data = b.getString("data");
                 videoDetailPayload=new Gson().fromJson(data,VideoDetailPayload.class);
                 Log.d("SuggestFragment",data);
-                String user=videoDetailPayload.getUser().getId();
+                String user="null";
+                if (videoDetailPayload.getUser()!=null){
+                   user=videoDetailPayload.getUser().getId();
+                }
+
                 String id=videoDetailPayload.getId();
                 HttpUtil.get().getAsync("https://api.iwara.tv/videos?rating=ecchi&user=" + user + "&exclude=" + id + "&limit=15", null,null, new HttpUtil.NetCallback() {
                     @Override

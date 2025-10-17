@@ -194,8 +194,8 @@ public class MainActivity extends BaseActivity<ActivityMainBinding> {
             public void status(boolean isLogin,String name) {
                 if (isLogin){
                     loginViewModel.setLogin(isLogin);
-                    runOnUiThread(()->ToastUtil.ToastUtil("欢迎回来，"+name,MainActivity.this));
-                    if (adapter.getItemId(2)!=10001){
+//                    runOnUiThread(()->ToastUtil.ToastUtil("欢迎回来，"+name,MainActivity.this));
+                    if (!adapter.checkItem(10001)){
                         Resources res = getResources();
                         adapter.insertItem(2,new MenuAdapter.MenuItemBean(10001,"订阅",new BitmapDrawable(res, BitmapFactory.decodeResource(res, R.mipmap.back))));
                         adapter.insertItem(3,new MenuAdapter.MenuItemBean(10002,"收藏",new BitmapDrawable(res, BitmapFactory.decodeResource(res, R.mipmap.collect))));

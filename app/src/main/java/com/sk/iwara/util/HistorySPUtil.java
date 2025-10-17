@@ -5,72 +5,49 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
 
+import com.google.android.exoplayer2.C;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sk.iwara.App;
+import com.sk.iwara.payload.HomeVideoPayload;
+import com.sk.iwara.payload.VideoDetailPayload;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by 25140 on 2025/10/15 .
  */
 public class HistorySPUtil {
-    public static class HistoryItem {
-        public String id;      // 业务 id
-        public String title;
-        public int num;
-        public long   clickTime; // 点击时间戳
-    }
+    private static final String NAME="history";
 
-    private final SharedPreferences sp;
+
 
     /* 构造函数：传入用户名（表名） */
-    public HistorySPUtil(String userName, Activity activity) {
-        sp = activity.getSharedPreferences("history_" + userName, Context.MODE_PRIVATE);
+    public static void add(HomeVideoPayload.Results item, Context context){
+        context.getSharedPreferences(NAME, Context.MODE_PRIVATE).edit().putString(item.getId(),new Gson().toJson(item)).apply();
     }
+    public static List<HomeVideoPayload.Results> getAll(Context context) {
+        SharedPreferences sp = context.getSharedPreferences(NAME, Context.MODE_PRIVATE);
+        Map<String, ?> allEntries = sp.getAll(); // 所有 key-value
 
-    /* 点击一条记录（相同 id 更新时间并置顶） */
-    public void click(String id) {
-        long now = System.currentTimeMillis();
-        List<HistoryItem> list = getAll();
+        List<HomeVideoPayload.Results> list = new ArrayList<>();
+        Gson gson = new Gson();
 
-        // 找相同 id
-        HistoryItem hit = null;
-        for (HistoryItem it : list) {
-            if (TextUtils.equals(it.id, id)) {
-                hit = it;
-                break;
-            }
+        for (Map.Entry<String, ?> entry : allEntries.entrySet()) {
+            String json = (String) entry.getValue(); // 一定是 String
+            HomeVideoPayload.Results item = gson.fromJson(json, HomeVideoPayload.Results.class);
+            list.add(item);
         }
-        if (hit != null) {
-            list.remove(hit);          // 先删掉旧数据
-        }
-        // 新数据插到队首
-        HistoryItem newest = new HistoryItem();
-        newest.id = id;
-        newest.clickTime = now;
-        list.add(0, newest);
-
-        // 持久化（只存前 200 条，防膨胀）
-        if (list.size() > 200) list = list.subList(0, 200);
-        save(list);
+        return list;
+    }
+    public static void clearAll(Context context){
+        context.getSharedPreferences(NAME,Context.MODE_PRIVATE).edit().clear().apply();
+    }
+    public static void clear(String id,Context context){
+        context.getSharedPreferences(NAME,Context.MODE_PRIVATE).edit().remove(id).apply();
     }
 
-    /* 获取有序列表（时间倒序） */
-    public List<HistoryItem> getAll() {
-        String json = sp.getString("list", "[]");
-        Type type = new TypeToken<List<HistoryItem>>(){}.getType();
-        return new Gson().fromJson(json, type);
-    }
-
-    /* 清空当前用户历史 */
-    public void clear() {
-        sp.edit().remove("list").apply();
-    }
-
-    /* 私有：保存列表 */
-    private void save(List<HistoryItem> list) {
-        sp.edit().putString("list", new Gson().toJson(list)).apply();
-    }
 }

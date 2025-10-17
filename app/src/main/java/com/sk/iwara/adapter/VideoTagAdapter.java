@@ -29,12 +29,12 @@ import java.util.List;
  * Created by 25140 on 2025/10/15 .
  */
 public class VideoTagAdapter extends RecyclerView.Adapter<VideoTagAdapter.Holder> {
-    private final List<TagPayload.ResultsBean> data;
+    private final List<String> data;
 
     private int checkedId = -1;
 
-    public VideoTagAdapter() {
-        this.data = new ArrayList<>();
+    public VideoTagAdapter(ArrayList<String> arrayList) {
+        this.data = arrayList;
     }
 
 
@@ -62,10 +62,11 @@ public class VideoTagAdapter extends RecyclerView.Adapter<VideoTagAdapter.Holder
 
     @Override
     public void onBindViewHolder(@NonNull Holder h, int position) {
-        TagPayload.ResultsBean item = data.get(position);
-        h.title.setText(item.getId());
-        h.url_name= item.getId();
-        h.layout.setOnClickListener(v -> removeItemAt(position));
+        String item = data.get(position);
+        h.title.setText(item);
+        h.url_name= item;
+        h.imageView.setVisibility(View.GONE);
+        h.layout.setOnClickListener(v ->{});
     }
 
 
@@ -90,7 +91,7 @@ public class VideoTagAdapter extends RecyclerView.Adapter<VideoTagAdapter.Holder
      * @param position 插入位置（0-based）
      * @param bean     新标签数据
      */
-    public void addItem(int position, TagPayload.ResultsBean bean) {
+    public void addItem(int position,String bean) {
         if (position < 0 || position > data.size()) return;
 
         // 1. 数据层插入

@@ -94,6 +94,15 @@ public class MenuAdapter extends RecyclerView.Adapter<MenuAdapter.Holder> {
 
 
     }
+    public boolean checkItem(int id){
+        for (int i = 0; i < data.size(); i++) {
+            if (data.get(i).id==id){
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * 根据动态 id 列表移除菜单项（可多个）
      * @param ids 可变参数，支持一次传多个 id

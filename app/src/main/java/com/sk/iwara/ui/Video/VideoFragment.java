@@ -12,6 +12,7 @@ import android.widget.SeekBar;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -25,6 +26,7 @@ import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sk.iwara.R;
+import com.sk.iwara.adapter.VideoTagAdapter;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.base.BaseActivity;
 import com.sk.iwara.base.BaseFragment;
@@ -37,18 +39,21 @@ import com.sk.iwara.util.PlayerSwipeSeek;
 import com.sk.iwara.util.PlayerUtil;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
     private ExoPlayer player;
     private String id;
     private boolean isFullScreen=false;
+    private VideoTagAdapter TagAdapter;
 
     private Handler handler = new Handler(Looper.getMainLooper());
-    public static VideoFragment newInstance(String videoUrl) {
+    public static VideoFragment newInstance(String videoUrl, ArrayList<String> tags) {
         VideoFragment fragment = new VideoFragment();
         Bundle args = new Bundle();
         args.putString("id", videoUrl);
+        args.putStringArrayList("tags",tags);
         fragment.setArguments(args);
         return fragment;
     }
@@ -122,6 +127,7 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
 
 
         getActivity().runOnUiThread(()->{
+
             // 1. 把值抛出去
             binding.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
                 @Override
@@ -138,6 +144,14 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
 
             VideoPagerAdapter adapter = new VideoPagerAdapter(getActivity());
             binding.viewPager.setAdapter(adapter);
+
+            ArrayList tags=  getArguments().getStringArrayList("tags");
+            TagAdapter=new VideoTagAdapter(tags);
+            binding.videoDetailTags.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
+            binding.videoDetailTags.setAdapter(TagAdapter);
+
+
+
 
             new TabLayoutMediator(binding.tabLayout, binding.viewPager,
                     (tab, position) -> tab.setText(position == 0 ? "推荐视频" : "评论 "+videoDetailPayload.getNumComments())

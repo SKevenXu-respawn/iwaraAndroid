@@ -19,8 +19,11 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.sk.iwara.R;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.HomeVideoPayload;
+import com.sk.iwara.payload.TagPayload;
+import com.sk.iwara.payload.VideoDetailPayload;
 import com.sk.iwara.ui.Video.VideoActivity;
 import com.sk.iwara.ui.Video.VideoFragment;
+import com.sk.iwara.util.HistorySPUtil;
 import com.sk.iwara.util.SPUtil;
 
 import java.time.LocalDateTime;
@@ -104,14 +107,25 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
             @Override
             public void onClick(View view) {
                // Log.d("VideoAdapter",bean.)
+                HistorySPUtil.add(bean,view.getContext());
+
                 Intent intent=new Intent(view.getContext(), VideoActivity.class);
                 Bundle bd=new Bundle();
                 bd.putString("id",bean.getId());
+                bd.putStringArrayList("tags",getAllItem(bean.getTags()));
                 intent.putExtra("data",bd);
+
                 view.getContext().startActivity(intent);
             }
         });
 
+    }
+    public ArrayList<String> getAllItem(List<HomeVideoPayload.Results.Tags> tags) {
+        ArrayList<String> data = new ArrayList<>();
+        for (HomeVideoPayload.Results.Tags item : tags) {
+            data.add(item.getId());
+        }
+        return data;
     }
     static class Holder extends RecyclerView.ViewHolder{
         Holder(View item){ super(item); }

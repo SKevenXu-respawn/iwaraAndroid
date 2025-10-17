@@ -9,6 +9,8 @@ import com.sk.iwara.R;
 import com.sk.iwara.base.BaseActivity;
 import com.sk.iwara.databinding.ActivityVideoBinding;
 
+import java.util.ArrayList;
+
 /**
  * Created by 25140 on 2025/10/13 .
  */
@@ -16,8 +18,8 @@ public class VideoActivity extends BaseActivity<ActivityVideoBinding> {
     private FragmentManager fragmentManager;
 
 
-    public void playVideo(String videoUrl) {
-        VideoFragment newFragment = VideoFragment.newInstance(videoUrl);
+    public void playVideo(String videoUrl, ArrayList<String> list) {
+        VideoFragment newFragment = VideoFragment.newInstance(videoUrl,list);
 
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, newFragment)
@@ -42,7 +44,8 @@ public class VideoActivity extends BaseActivity<ActivityVideoBinding> {
     protected void init() {
         fragmentManager = getSupportFragmentManager();
         String videoUrl = getIntent().getBundleExtra("data").getString("id");
-        playVideo(videoUrl);
+        ArrayList<String> tags = getIntent().getBundleExtra("data").getStringArrayList("tags");
+        playVideo(videoUrl,tags);
 
     }
 

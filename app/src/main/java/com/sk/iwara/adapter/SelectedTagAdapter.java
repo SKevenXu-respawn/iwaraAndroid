@@ -1,13 +1,6 @@
 package com.sk.iwara.adapter;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -15,10 +8,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
 import com.sk.iwara.R;
 import com.sk.iwara.payload.TagPayload;
 
@@ -43,11 +34,12 @@ public class SelectedTagAdapter extends RecyclerView.Adapter<SelectedTagAdapter.
         LinearLayout layout;
         ImageView imageView;
         String url_name;
+
         Holder(View v) {
             super(v);
-            layout=v.findViewById(R.id.tag_layout);
+            layout = v.findViewById(R.id.tag_layout);
             title = v.findViewById(R.id.tag_text);
-            imageView=v.findViewById(R.id.tag_cancel);
+            imageView = v.findViewById(R.id.tag_cancel);
         }
     }
 
@@ -64,40 +56,78 @@ public class SelectedTagAdapter extends RecyclerView.Adapter<SelectedTagAdapter.
     public void onBindViewHolder(@NonNull Holder h, int position) {
         TagPayload.ResultsBean item = data.get(position);
         h.title.setText(item.getId());
-        h.url_name= item.getId();
+        h.url_name = item.getId();
         h.layout.setOnClickListener(v -> removeItemAt(position));
-      }
-
-
-    @Override public int getItemCount() { return data.size(); }
-    /**
-     * 点击后移除指定位置项（带动画）
-     */
-    private void removeItemAt(int position) {
-        if (position < 0 || position >= data.size()) return;
-
-        // 1. 数据层删除
-
-        // 2. UI 带动画删除
-        notifyItemRemoved(position);
-
-        // 4. 可选：立即触发外部回调（留空即可）
-        // if (listener != null) listener.onItemRemoved(position);
     }
+
+
+    @Override
+    public int getItemCount() {
+        return data.size();
+    }
+
     /**
-     * 动态添加一个标签项（可插入到任意位置）
-     * @param position 插入位置（0-based）
-     * @param bean     新标签数据
+     * 添加一个标签项（带动画 + 回调）
      */
     public void addItem(int position, TagPayload.ResultsBean bean) {
         if (position < 0 || position > data.size()) return;
 
-        // 1. 数据层插入
         data.add(position, bean);
-
-        // 2. UI 带动画插入
         notifyItemInserted(position);
+
+        if (listener != null) {
+            listener.onItemAdded(bean, position);
+        }
     }
+
+    /**
+     * 移除指定位置项（带动画 + 回调）
+     */
+    public void removeItemAt(int position) {
+        if (position < 0 || position >= data.size()) return;
+
+        TagPayload.ResultsBean removed = data.remove(position);
+        notifyItemRemoved(position);
+
+        if (listener != null) {
+            listener.onItemRemoved(removed, position);
+        }
+    }
+
+    /**
+     * 清空所有项（带动画 + 回调）
+     */
+    public void removedAll() {
+        int oldSize = data.size();
+        if (oldSize == 0) return;
+
+        data.clear();
+        notifyItemRangeRemoved(0, oldSize);
+
+        if (listener != null) {
+            listener.onAllItemsCleared();
+        }
+    }
+
+    public List<String> getAllItem() {
+        List<String> data = new ArrayList<>();
+        for (TagPayload.ResultsBean item : this.data) {
+            data.add(item.getId());
+        }
+        return data;
+    }
+    public interface OnItemChangedListener {
+        void onItemAdded(TagPayload.ResultsBean addedItem, int position);
+        void onItemRemoved(TagPayload.ResultsBean removedItem, int position);
+        void onAllItemsCleared(); // 可选：清空回调
+    }
+    private OnItemChangedListener listener;
+
+    public void setOnItemChangedListener(OnItemChangedListener l) {
+        this.listener = l;
+    }
+    }
+
 
 //    public static class TagItemBean {
 //        public String url_name;
@@ -127,4 +157,3 @@ public class SelectedTagAdapter extends RecyclerView.Adapter<SelectedTagAdapter.
 //    }
 
 
-}

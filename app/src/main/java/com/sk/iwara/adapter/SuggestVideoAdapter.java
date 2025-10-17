@@ -108,7 +108,7 @@ public class SuggestVideoAdapter extends RecyclerView.Adapter<SuggestVideoAdapte
             @Override
             public void onClick(View view) {
                 // Log.d("VideoAdapter",bean.)
-                VideoFragment newFragment = VideoFragment.newInstance(bean.getId());
+                VideoFragment newFragment = VideoFragment.newInstance(bean.getId(),getAllItem(bean.getTags()));
 
                   fragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, newFragment)
@@ -117,6 +117,13 @@ public class SuggestVideoAdapter extends RecyclerView.Adapter<SuggestVideoAdapte
             }
         });
 
+    }
+    public ArrayList<String> getAllItem(List<HomeVideoPayload.Results.Tags> tags) {
+        ArrayList<String> data = new ArrayList<>();
+        for (HomeVideoPayload.Results.Tags item : tags) {
+            data.add(item.getId());
+        }
+        return data;
     }
     static class Holder extends RecyclerView.ViewHolder{
         Holder(View item){ super(item); }

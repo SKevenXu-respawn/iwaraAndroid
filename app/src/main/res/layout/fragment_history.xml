@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
+    android:background="#F4F4F4"
     android:fitsSystemWindows="true"
     android:paddingHorizontal="16dp"
     android:layout_height="match_parent">
-    <include layout="@layout/titlebar"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/history_recycle"
         android:layout_width="match_parent"

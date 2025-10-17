@@ -1,5 +1,6 @@
 package com.sk.iwara.ui.Home;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -140,6 +142,23 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> {
                 selectedTagAdapter.addItem(selectedTagAdapter.getItemCount(),removedItem);
                 binding.homeTagSelectedList.smoothScrollToPosition(selectedTagAdapter.getItemCount());
                 binding.homeTagRecycle.smoothScrollToPosition(selectedTagAdapter.getItemCount());
+
+            }
+        });
+        selectedTagAdapter.setOnItemChangedListener(new SelectedTagAdapter.OnItemChangedListener() {
+            @Override
+            public void onItemAdded(TagPayload.ResultsBean addedItem, int position) {
+                loadTags(selectedTagAdapter.getAllItem());
+            }
+
+            @Override
+            public void onItemRemoved(TagPayload.ResultsBean removedItem, int position) {
+                loadTags(selectedTagAdapter.getAllItem());
+            }
+
+            @Override
+            public void onAllItemsCleared() {
+                getData();
             }
         });
         binding.homeTagSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -174,6 +193,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> {
                 return false;
             }
         });
+
         HttpUtil.get().getAsync(IWARA_API.VIDEO+"/tags?filter=A&page=0", null, null, new HttpUtil.NetCallback() {
             @Override
             public void onSuccess(String respBody) {
@@ -259,4 +279,36 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> {
                     }
                 });
     }
+    private void loadTags(List<String> tags){
+        if (tags == null || tags.isEmpty()) {
+            // 不传 tag 时走默认列表
+            getData();
+            return;
+        }
+        String tagParam = TextUtils.join(",", tags);
+        Log.d("HomeFragment","search tags: "+tagParam);
+        HttpUtil.get().getAsync(IWARA_API.VIDEO + "/videos?rating=all&tags="+ tagParam+"&sort="+type+"&page="+(page++) , null, null, new HttpUtil.NetCallback() {
+            @Override
+            public void onSuccess(String respBody) {
+                getActivity().runOnUiThread(() -> {
+                    HomeVideoPayload payload = new Gson().fromJson(respBody, HomeVideoPayload.class);
+                    adapter.refresh(payload.getResults());
+                    adapter.notifyDataSetChanged();
+                    isLoading = false;
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("TAG", "tag 搜索失败: " + e.getMessage());
+                getActivity().runOnUiThread(() -> {
+                    ToastUtil.ToastUtil(e.getMessage(), getActivity());
+                    isLoading = false;
+                    page--;          // 失败回退页码
+                });
+            }
+        });
+
+    }
+
 }

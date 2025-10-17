@@ -3,5 +3,11 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="暂未开发,请谅解"
+        android:textColor="@color/black"
+        android:textSize="16dp"
+        android:gravity="center"/>
 </LinearLayout>
