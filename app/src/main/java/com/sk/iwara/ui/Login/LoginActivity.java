@@ -1,6 +1,7 @@
 package com.sk.iwara.ui.Login;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.util.Log;
 import android.view.View;
 
@@ -24,7 +25,12 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
 
     @Override
     protected void init() {
-
+        binding.registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
+            }
+        });
     }
 
     @Override
