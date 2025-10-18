@@ -60,7 +60,10 @@ public class NewFragment extends BaseFragment<FragmentNewBinding> {
         });
     }
     private void getData(){
-        binding.getRoot().setRefreshing(true);
+        getActivity().runOnUiThread(()->{
+            binding.getRoot().setRefreshing(true);
+        });
+
         HttpUtil.get().getAsync(IWARA_API.getHomeVideos("date", 15,1), null,null, new HttpUtil.NetCallback() {
             @Override
             public void onSuccess(String respBody) {
@@ -74,8 +77,11 @@ public class NewFragment extends BaseFragment<FragmentNewBinding> {
 
             @Override
             public void onFailure(Exception e) {
-                ToastUtil.ToastUtil(e.getMessage(), getActivity());
-                binding.getRoot().setRefreshing(false);
+                getActivity().runOnUiThread(()->{
+                    ToastUtil.ToastUtil(e.getMessage(), getActivity());
+                    binding.getRoot().setRefreshing(false);
+                });
+
             }
         });
     }

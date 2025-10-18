@@ -1,7 +1,6 @@
 package com.sk.iwara.adapter;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,14 +19,17 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.sk.iwara.R;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.HomeVideoPayload;
+import com.sk.iwara.payload.TagPayload;
+import com.sk.iwara.payload.VideoDetailPayload;
 import com.sk.iwara.ui.Video.VideoActivity;
+import com.sk.iwara.ui.Video.VideoFragment;
+import com.sk.iwara.util.HistorySPUtil;
+import com.sk.iwara.util.SPUtil;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.xml.transform.Result;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
     private List<HomeVideoPayload.Results> list = new ArrayList<>();
@@ -62,7 +64,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
         ImageView thumb=h.itemView.findViewById(R.id.card_user_thumb);
         TextView name=h.itemView.findViewById(R.id.card_user_name);
         TextView date=h.itemView.findViewById(R.id.card_date);
-        if (bean.getId()!=null){
+        if (bean.getId()!=null&& !SPUtil.getBoolean("office",false)){
             Glide.with(im.getContext())
                     .load(IWARA_API.IMAGE+"thumbnail/"+bean.getFile().getId()+"/thumbnail-"+String.format("%02d", bean.getThumbnail())+".jpg")
                     .error(R.mipmap.no_icon)
@@ -97,19 +99,33 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.Holder> {
                     .into(thumb);
         }
         name.setText(bean.getUser().getUsername());
-        date.setText(FormatDate(bean.getFile().getUpdatedAt()));
+        if (bean.getFile()!=null){
+            date.setText(FormatDate(bean.getFile().getUpdatedAt()));
+        }
+
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                // Log.d("VideoAdapter",bean.)
+                HistorySPUtil.add(bean,view.getContext());
+
                 Intent intent=new Intent(view.getContext(), VideoActivity.class);
                 Bundle bd=new Bundle();
                 bd.putString("id",bean.getId());
+                bd.putStringArrayList("tags",getAllItem(bean.getTags()));
                 intent.putExtra("data",bd);
+
                 view.getContext().startActivity(intent);
             }
         });
 
+    }
+    public ArrayList<String> getAllItem(List<HomeVideoPayload.Results.Tags> tags) {
+        ArrayList<String> data = new ArrayList<>();
+        for (HomeVideoPayload.Results.Tags item : tags) {
+            data.add(item.getId());
+        }
+        return data;
     }
     static class Holder extends RecyclerView.ViewHolder{
         Holder(View item){ super(item); }

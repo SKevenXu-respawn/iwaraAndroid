@@ -1,7 +1,6 @@
 package com.sk.iwara.adapter;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -21,24 +21,26 @@ import com.sk.iwara.R;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.HomeVideoPayload;
 import com.sk.iwara.ui.Video.VideoActivity;
+import com.sk.iwara.ui.Video.VideoFragment;
+import com.sk.iwara.util.SPUtil;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.transform.Result;
-
 public class SuggestVideoAdapter extends RecyclerView.Adapter<SuggestVideoAdapter.Holder> {
     private List<HomeVideoPayload.Results> list = new ArrayList<>();
-
-    public void addData(List<HomeVideoPayload.Results> more){
+    private FragmentManager fragmentManager; // 用于管理 Fragment 的 FragmentManager
+    public void addData(List<HomeVideoPayload.Results> more,FragmentManager fragmentManager){
         Log.d("IWARAAdapter", "loadMore 返回 size = " + more.size());
         list.addAll(more);
+        this.fragmentManager=fragmentManager;
         notifyDataSetChanged();
     }
-    public void refresh(List<HomeVideoPayload.Results> newList){
+    public void refresh(List<HomeVideoPayload.Results> newList,FragmentManager fragmentManager){
         list.clear();
+        this.fragmentManager=fragmentManager;
         list.addAll(newList);
         notifyDataSetChanged();
     }
@@ -66,7 +68,7 @@ public class SuggestVideoAdapter extends RecyclerView.Adapter<SuggestVideoAdapte
         TextView likes=h.itemView.findViewById(R.id.suggest_video_user_likes);
         views.setText(String.valueOf( bean.getNumViews()));
         likes.setText(String.valueOf(bean.getNumLikes()));
-        if (bean.getId()!=null){
+        if (bean.getId()!=null&& !SPUtil.getBoolean("office",false)){
             Glide.with(im.getContext())
                     .load(IWARA_API.IMAGE+"thumbnail/"+bean.getFile().getId()+"/thumbnail-"+String.format("%02d", bean.getThumbnail())+".jpg")
                     .error(R.mipmap.no_icon)
@@ -106,15 +108,22 @@ public class SuggestVideoAdapter extends RecyclerView.Adapter<SuggestVideoAdapte
             @Override
             public void onClick(View view) {
                 // Log.d("VideoAdapter",bean.)
-                Intent intent=new Intent(view.getContext(), VideoActivity.class);
-                Bundle bd=new Bundle();
-                bd.putString("id",bean.getId());
-                intent.putExtra("data",bd);
+                VideoFragment newFragment = VideoFragment.newInstance(bean.getId(),getAllItem(bean.getTags()));
 
-                view.getContext().startActivity(intent);
+                  fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, newFragment)
+                        .addToBackStack(null) // 添加到返回栈
+                        .commit();
             }
         });
 
+    }
+    public ArrayList<String> getAllItem(List<HomeVideoPayload.Results.Tags> tags) {
+        ArrayList<String> data = new ArrayList<>();
+        for (HomeVideoPayload.Results.Tags item : tags) {
+            data.add(item.getId());
+        }
+        return data;
     }
     static class Holder extends RecyclerView.ViewHolder{
         Holder(View item){ super(item); }

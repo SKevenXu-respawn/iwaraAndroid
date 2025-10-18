@@ -110,13 +110,19 @@ public abstract class BaseFragment<VB extends ViewBinding> extends Fragment {
     /* ======== 加载框（简易） ======== */
     private Dialog dialog;
     public void showLoading() {
-        dialog= LoadingUtil.show(getContext(), R.mipmap.logo,false);
+        getActivity().runOnUiThread(()->{
+            dialog= LoadingUtil.show(getContext(), R.mipmap.logo,false);
+        });
+
     }
 
     public void dismissLoading() {
-        if (dialog != null && dialog.isShowing()) {
-            dialog.dismiss();
-        }
+        getActivity().runOnUiThread(()->{
+            if (dialog != null && dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        });
+
     }
 
     /* ======== 权限申请 ======== */
