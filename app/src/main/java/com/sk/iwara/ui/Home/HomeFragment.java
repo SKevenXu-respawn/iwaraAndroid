@@ -42,7 +42,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class HomeFragment extends BaseFragment<FragmentHomeBinding> {
+public class
+HomeFragment extends BaseFragment<FragmentHomeBinding> {
 
     private int page = 1;                 // 当前页
     private boolean isLoading = false;    // 正在加载更多时不再重复触发
