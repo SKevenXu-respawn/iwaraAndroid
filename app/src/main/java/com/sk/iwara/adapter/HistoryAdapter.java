@@ -3,12 +3,15 @@ package com.sk.iwara.adapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,10 +27,7 @@ import com.bumptech.glide.load.model.LazyHeaders;
 import com.sk.iwara.R;
 import com.sk.iwara.api.IWARA_API;
 import com.sk.iwara.payload.HomeVideoPayload;
-import com.sk.iwara.payload.TagPayload;
-import com.sk.iwara.payload.VideoDetailPayload;
 import com.sk.iwara.ui.Video.VideoActivity;
-import com.sk.iwara.ui.Video.VideoFragment;
 import com.sk.iwara.util.HistorySPUtil;
 import com.sk.iwara.util.SPUtil;
 
@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Holder> {
     private List<HomeVideoPayload.Results> list = new ArrayList<>();
@@ -135,6 +136,8 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Holder> 
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
                 // Log.d("VideoAdapter",bean.)
                 //HistorySPUtil.add(new HistorySPUtil.HistoryItem(bean),view.getContext());
 
@@ -147,27 +150,17 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Holder> 
                 view.getContext().startActivity(intent);
             }
         });
-        ll.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                animateBottomMargin(ll,40);
-                return true;
-            }
+        cardView.setOnLongClickListener(v -> {
+            animateDeleteCollapse(delete, true);
+            delete.requestFocus();
+            return true;
         });
-        // 失去焦点自动隐藏
-        ll.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                animateBottomMargin(ll, 0); // 恢复 0dp
-            }
-        });
-        delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                HistorySPUtil.clear(bean.getId(), view.getContext());
-                animateBottomMargin(ll,0);
-                Log.d("HistoryAdapter", "delete");
-                refresh();
-            }
+
+
+        delete.setOnClickListener(v -> {
+            HistorySPUtil.clear(bean.getId(), v.getContext());
+            animateDeleteCollapse(delete, false);
+            refresh();
         });
 
     }
@@ -192,21 +185,56 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.Holder> 
             return iso;
         }
     }
-    private void animateBottomMargin(View target, int dp) {
-        int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, target.getContext().getResources().getDisplayMetrics());
-
-        // 创建 LayoutParams 动画
-        ValueAnimator animator = ValueAnimator.ofInt(getBottomMargin(target), px);
-        animator.addUpdateListener(animation -> {
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) target.getLayoutParams();
-            params.bottomMargin = (int) animation.getAnimatedValue();
-            target.setLayoutParams(params);
-        });
-        animator.setDuration(200); // 200ms 动画
-        animator.start();
+    private void animateDeleteView(View view, boolean show) {
+        float from = show ? 1f : 0f;
+        float to = show ? 0f : 1f;
+        view.setVisibility(View.VISIBLE);
+        view.setAlpha(from);
+        view.animate()
+                .alpha(to)
+                .setDuration(200)
+                .withEndAction(() -> {
+                    if (!show) view.setVisibility(View.GONE);
+                })
+                .start();
     }
+    private void animateDeleteCollapse(final View view, boolean expand) {
+        if (expand) {
+            view.setVisibility(View.VISIBLE);
+            final int widthSpec = View.MeasureSpec.makeMeasureSpec(
+                    ((View) view.getParent()).getWidth(), View.MeasureSpec.EXACTLY);
+            final int heightSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            view.measure(widthSpec, heightSpec);
+            int targetHeight = view.getMeasuredHeight();
+            view.getLayoutParams().height = 0;
+            view.requestLayout();
 
-    private int getBottomMargin(View target) {
-        return ((FrameLayout.LayoutParams) target.getLayoutParams()).bottomMargin;
+            Animation a = new Animation() {
+                @Override protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    view.getLayoutParams().height = interpolatedTime == 1
+                            ? ViewGroup.LayoutParams.WRAP_CONTENT
+                            : (int) (targetHeight * interpolatedTime);
+                    view.requestLayout();
+                }
+                @Override public boolean willChangeBounds() { return true; }
+            };
+            a.setDuration(250);
+            view.startAnimation(a);
+        } else {
+            final int initialHeight = view.getMeasuredHeight();
+            Animation a = new Animation() {
+                @Override protected void applyTransformation(float interpolatedTime, Transformation t) {
+                    if (interpolatedTime == 1) {
+                        view.setVisibility(View.GONE);
+                    } else {
+                        view.getLayoutParams().height = initialHeight - (int) (initialHeight * interpolatedTime);
+                        view.requestLayout();
+                    }
+                }
+                @Override public boolean willChangeBounds() { return true; }
+            };
+            a.setDuration(250);
+            view.startAnimation(a);
+        }
     }
 }

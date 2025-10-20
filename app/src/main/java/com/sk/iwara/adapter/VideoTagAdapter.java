@@ -3,8 +3,10 @@ package com.sk.iwara.adapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.sk.iwara.R;
 import com.sk.iwara.payload.TagPayload;
+import com.sk.iwara.ui.Search.SearchActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,7 +69,14 @@ public class VideoTagAdapter extends RecyclerView.Adapter<VideoTagAdapter.Holder
         h.title.setText(item);
         h.url_name= item;
         h.imageView.setVisibility(View.GONE);
-        h.layout.setOnClickListener(v ->{});
+        h.layout.setOnClickListener(v ->{
+
+            Intent intent=new Intent(v.getContext(), SearchActivity.class);
+            intent.putExtra("tag",item);
+            v.getContext().startActivity(intent);
+
+
+        });
     }
 
 

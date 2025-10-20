@@ -37,18 +37,26 @@ public class SearchActivity extends BaseActivity<FragmentSearchBinding> {
     String query=null;
     String fromat=null;
     Map<String,String> map;
+
+    private String type=null;
+
     @Override
     protected void init() {
         map=new HashMap<>();
         map.put("Authorization","Bearer "+ LoginSPUtil.getInstance(this).get("access_token",null));
 
         if (getIntent()!=null){
-            query=getIntent().getStringExtra("query");
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                fromat=   URLEncoder.encode(query, StandardCharsets.UTF_8);
+            if (getIntent().getStringExtra("tag")!=null){
+                type=getIntent().getStringExtra("tag");
+                binding.searchView.setQuery(type,false);
+            }else {
+                query=getIntent().getStringExtra("query");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    fromat=   URLEncoder.encode(query, StandardCharsets.UTF_8);
+                }
+                binding.searchView.setQuery(query,false);
             }
-            binding.searchView.setQuery(query,false);
+
             binding.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -111,53 +119,101 @@ public class SearchActivity extends BaseActivity<FragmentSearchBinding> {
         runOnUiThread(()->{
             binding.getRoot().setRefreshing(true);
         });
+        if (type==null) {
 
-        HttpUtil.get().getAsync(IWARA_API.VIDEO+"/search?type=videos&page=0&query="+fromat, null,map, new HttpUtil.NetCallback() {
-            @Override
-            public void onSuccess(String respBody) {
-                runOnUiThread(()->{
+            HttpUtil.get().getAsync(IWARA_API.VIDEO + "/search?type=videos&page=0&query=" + fromat, null, map, new HttpUtil.NetCallback() {
+                @Override
+                public void onSuccess(String respBody) {
+                    runOnUiThread(() -> {
 
-                    HomeVideoPayload homeVideoPayload=new Gson().fromJson(respBody, HomeVideoPayload.class);
-                    adapter.refresh(homeVideoPayload.getResults());
-                    binding.getRoot().setRefreshing(false);
-                });
-            }
+                        HomeVideoPayload homeVideoPayload = new Gson().fromJson(respBody, HomeVideoPayload.class);
+                        adapter.refresh(homeVideoPayload.getResults());
+                        binding.getRoot().setRefreshing(false);
+                    });
+                }
 
-            @Override
-            public void onFailure(Exception e) {
-                runOnUiThread(()->{
-                    Log.e("SearchActivity",e.getMessage());
-                    ToastUtil.ToastUtil(e.getMessage(),SearchActivity.this);
-                    binding.getRoot().setRefreshing(false);
-                });
+                @Override
+                public void onFailure(Exception e) {
+                    runOnUiThread(() -> {
+                        Log.e("SearchActivity", e.getMessage());
+                        ToastUtil.ToastUtil(e.getMessage(), SearchActivity.this);
+                        binding.getRoot().setRefreshing(false);
+                    });
 
-            }
-        });
+                }
+            });
+        }else{
+            HttpUtil.get().getAsync(IWARA_API.VIDEO + "/search?type=videos&page=0&tags=" + type, null, map, new HttpUtil.NetCallback() {
+                @Override
+                public void onSuccess(String respBody) {
+                    runOnUiThread(() -> {
+
+                        HomeVideoPayload homeVideoPayload = new Gson().fromJson(respBody, HomeVideoPayload.class);
+                        adapter.refresh(homeVideoPayload.getResults());
+                        binding.getRoot().setRefreshing(false);
+                    });
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    runOnUiThread(() -> {
+                        Log.e("SearchActivity", e.getMessage());
+                        ToastUtil.ToastUtil(e.getMessage(), SearchActivity.this);
+                        binding.getRoot().setRefreshing(false);
+                    });
+
+                }
+            });
+        }
     }
     private void loadMore() {
         if (isLoading) return;           // 防止重复
         isLoading = true;
+        if (type!=null){
+            HttpUtil.get().getAsync(IWARA_API.VIDEO+"search?type=videos&page="+(page++)+"&tags="+type, null,map,
+                    new HttpUtil.NetCallback() {
+                        @Override
+                        public void onSuccess(String respBody) {
+                            runOnUiThread(() -> {
+                                HomeVideoPayload payload = new Gson().fromJson(respBody, HomeVideoPayload.class);
+                                adapter.addData(payload.getResults());
+                                adapter.notifyDataSetChanged();
+                                isLoading = false;
+                            });
+                        }
 
-        HttpUtil.get().getAsync(IWARA_API.VIDEO+"search?type=videos&page="+(page++)+"&query="+fromat, null,map,
-                new HttpUtil.NetCallback() {
-                    @Override
-                    public void onSuccess(String respBody) {
-                        runOnUiThread(() -> {
-                            HomeVideoPayload payload = new Gson().fromJson(respBody, HomeVideoPayload.class);
-                            adapter.addData(payload.getResults());
-                            adapter.notifyDataSetChanged();
-                            isLoading = false;
-                        });
-                    }
+                        @Override
+                        public void onFailure(Exception e) {
+                            runOnUiThread(() -> {
+                                ToastUtil.ToastUtil(e.getMessage(), SearchActivity.this);
+                                isLoading = false;
+                                page--;          // 失败回退页码
+                            });
+                        }
+                    });
+        }else{
+            HttpUtil.get().getAsync(IWARA_API.VIDEO+"search?type=videos&page="+(page++)+"&query="+fromat, null,map,
+                    new HttpUtil.NetCallback() {
+                        @Override
+                        public void onSuccess(String respBody) {
+                            runOnUiThread(() -> {
+                                HomeVideoPayload payload = new Gson().fromJson(respBody, HomeVideoPayload.class);
+                                adapter.addData(payload.getResults());
+                                adapter.notifyDataSetChanged();
+                                isLoading = false;
+                            });
+                        }
 
-                    @Override
-                    public void onFailure(Exception e) {
-                        runOnUiThread(() -> {
-                            ToastUtil.ToastUtil(e.getMessage(), SearchActivity.this);
-                            isLoading = false;
-                            page--;          // 失败回退页码
-                        });
-                    }
-                });
+                        @Override
+                        public void onFailure(Exception e) {
+                            runOnUiThread(() -> {
+                                ToastUtil.ToastUtil(e.getMessage(), SearchActivity.this);
+                                isLoading = false;
+                                page--;          // 失败回退页码
+                            });
+                        }
+                    });
+        }
+
     }
 }

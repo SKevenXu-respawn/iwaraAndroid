@@ -219,7 +219,7 @@ public class HomeFragment extends BaseFragment<FragmentHomeBinding> {
 
     }
     private void getData(){
-        getActivity().runOnUiThread(()->{
+        requireActivity().runOnUiThread(()->{
             showLoading();
 
         });
