@@ -1,5 +1,7 @@
 package com.sk.iwara.ui.Home;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -44,9 +46,13 @@ import java.util.List;
 
 public class
 HomeFragment extends BaseFragment<FragmentHomeBinding> {
-
+    private final Handler mHandler = new Handler(Looper.getMainLooper());
+    private Runnable mSearchTask;          // 待执行的搜索任务
     private int page = 1;                 // 当前页
     private boolean isLoading = false;    // 正在加载更多时不再重复触发
+    private int tagPage=1;
+    private boolean isTagLoading=false;
+    private boolean isTagSearching=false;
     VideoAdapter adapter;
     SelectedTagAdapter selectedTagAdapter;
     ResultTagAdapter resultTagAdapter;
@@ -109,7 +115,22 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
         }});
        // binding.homeTagSearchResultList.setLayoutManager(new GridLayoutManager(getContext(),3));
         binding.homeTagSearchResultList.setAdapter(resultTagAdapter);
+        binding.homeTagSearchResultList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                super.onScrolled(rv, dx, dy);
+                if (dy <= 0) return;                 // 向上滑不管
 
+                GridLayoutManager lm = (GridLayoutManager) rv.getLayoutManager();
+                int totalItemCount = lm.getItemCount();
+                int lastVisible  = lm.findLastVisibleItemPosition();
+
+                // 还剩 3 个 item 时提前加载，可自己调
+                if (!isTagLoading && lastVisible >= totalItemCount - 3) {
+                    loadMoreTags();
+                }
+            }
+        });
 
          selectedTagAdapter = new SelectedTagAdapter();
          binding.homeTagSelectedList.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
@@ -136,6 +157,7 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
                 }
             }
         });
+
         resultTagAdapter.setOnItemClickListener(new ResultTagAdapter.setOnItemClickListener() {
             @Override
             public void onItemClick(TagPayload.ResultsBean removedItem, int position) {
@@ -171,26 +193,58 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
 
             @Override
             public boolean onQueryTextChange(String s) {
-                HttpUtil.get().getAsync(IWARA_API.VIDEO + "/autocomplete/tags?query=" + s, null, null, new HttpUtil.NetCallback() {
-                    @Override
-                    public void onSuccess(String respBody) {
-                        TagPayload tags=new Gson().fromJson(respBody,TagPayload.class);
-                        if (tags.getResults()!=null){
-                            getActivity().runOnUiThread(()->{
-                                resultTagAdapter.removedAll();
-                                resultTagAdapter.addAll(0,tags.getResults());
-                            });
+               if (s.length()>0){
+                   isTagSearching=true;
+                  // 2. 取消上一次尚未发出的请求
+                   if (mSearchTask != null) {
+                       mHandler.removeCallbacks(mSearchTask);
+                   }
+
+                   // 3. 创建新的延迟任务
+                   mSearchTask = () -> HttpUtil.get()
+                           .getAsync(IWARA_API.VIDEO + "/autocomplete/tags?query=" + s,
+                                   null, null, new HttpUtil.NetCallback() {
+                                       @Override
+                                       public void onSuccess(String respBody) {
+                                           TagPayload tags = new Gson().fromJson(respBody, TagPayload.class);
+                                           if (tags.getResults() != null) {
+                                               getActivity().runOnUiThread(() -> {
+                                                   resultTagAdapter.removedAll();
+                                                   resultTagAdapter.addAll(0, tags.getResults());
+                                               });
+                                           }
+                                       }
+
+                                       @Override
+                                       public void onFailure(Exception e) { /* 空实现或 toast */ }
+                                   });
+
+                   // 4. 延迟 1 秒执行
+                   mHandler.postDelayed(mSearchTask, 1000);
+               }else{
+                   isTagSearching=false;
+                   HttpUtil.get().getAsync(IWARA_API.VIDEO+"/tags?filter=A&page=0", null, null, new HttpUtil.NetCallback() {
+                       @Override
+                       public void onSuccess(String respBody) {
+
+                           TagPayload tags=new Gson().fromJson(respBody,TagPayload.class);
+                           if (tags.getResults()!=null){
+                               getActivity().runOnUiThread(()->{
+                                   resultTagAdapter.removedAll();
+                                   resultTagAdapter.addAll(0,tags.getResults());
+                               });
+                           }
+
+                       }
+
+                       @Override
+                       public void onFailure(Exception e) {
+                           Log.d("HomeFragment", "onFailure: "+e.getMessage());
+                       }
+                   });
+               }
 
 
-
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Exception e) {
-
-                    }
-                });
                 return false;
             }
         });
@@ -218,6 +272,32 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
             }
         });
 
+    }
+    private void loadMoreTags(){
+        if (isTagLoading&&!isTagSearching) return;           // 防止重复
+        isTagLoading = true;
+        isTagSearching=true;
+        HttpUtil.get().getAsync(IWARA_API.VIDEO+"/tags?filter=A&page="+(++tagPage), null, null, new HttpUtil.NetCallback() {
+            @Override
+            public void onSuccess(String respBody) {
+
+                TagPayload tags=new Gson().fromJson(respBody,TagPayload.class);
+                if (tags.getResults()!=null){
+                    getActivity().runOnUiThread(()->{
+                        resultTagAdapter.addAll(resultTagAdapter.getItemCount(),tags.getResults());
+                    });
+
+
+
+                }
+
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Log.d("HomeFragment", "onFailure: "+e.getMessage());
+            }
+        });
     }
     private void getData(){
         requireActivity().runOnUiThread(()->{

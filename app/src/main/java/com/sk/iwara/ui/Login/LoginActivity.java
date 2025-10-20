@@ -93,7 +93,7 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                                                                     userPayload.getUser().getAvatar()==null?null: userPayload.getUser().getAvatar().getId()+"/"+userPayload.getUser().getAvatar().getName());
                                                             ToastUtil.ToastUtil(userPayload.getUser().getName()+" 欢迎回来!",LoginActivity.this);
                                                             dismissLoading();
-
+                                                            Log.d("access_token",tokenPayload.getAccess_token());
                                                             onBackPressed();
                                                         });
 

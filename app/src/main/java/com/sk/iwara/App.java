@@ -16,6 +16,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import me.jessyan.autosize.AutoSize;
+import me.jessyan.autosize.AutoSizeCompat;
+import me.jessyan.autosize.AutoSizeConfig;
+
 public class App extends Application {
     private static SimpleCache sCache;          // 必须单例
     public static SimpleCache getCache() { return sCache; }
@@ -30,6 +34,8 @@ public class App extends Application {
         VideoTask.video=new ArrayList<>();
 
         SPUtil.init(this,"Config");
-        
+        AutoSizeCompat.autoConvertDensityOfGlobal(getResources());
+        AutoSizeConfig.getInstance().setExcludeFontScale(true);
+        AutoSize.initCompatMultiProcess(this);
     }
 }
