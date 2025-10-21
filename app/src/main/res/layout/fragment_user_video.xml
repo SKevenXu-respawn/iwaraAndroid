@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:id="@+id/user_video_recycle"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <TextView
+        android:id="@+id/follow_no_match"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="暂时还没有开发捏:("
+        android:textSize="16dp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:visibility="gone"/>
+</FrameLayout>

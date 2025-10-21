@@ -23,7 +23,8 @@ public class LoginSPUtil {
         }
         return INSTANCE;
     }
-    public void putLoginData(String username, String name, String email, String join, String lastLogin, String status, String token, String access_token, @Nullable String thumb){
+    public void putLoginData(String userId,String username, String name, String email, String join, String lastLogin, String status, String token, String access_token, @Nullable String thumb){
+            put("userId",userId);
             put("username",username);
             put("name",name);
             put("email",email);

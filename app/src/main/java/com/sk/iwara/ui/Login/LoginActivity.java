@@ -82,7 +82,9 @@ public class LoginActivity extends BaseActivity<ActivityLoginBinding> {
                                                     UserPayload userPayload=new Gson().fromJson(respBody, UserPayload.class);
                                                     if (userPayload.getUser()!=null){
                                                         runOnUiThread(()->{
-                                                            LoginSPUtil.getInstance(LoginActivity.this).putLoginData(userPayload.getUser().getUsername(),
+                                                            LoginSPUtil.getInstance(LoginActivity.this).putLoginData(
+                                                                    userPayload.getUser().getId(),
+                                                                    userPayload.getUser().getUsername(),
                                                                     userPayload.getUser().getName(),
                                                                     userPayload.getUser().getEmail(),
                                                                     userPayload.getUser().getCreatedAt(),
