@@ -300,10 +300,13 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
         });
     }
     private void getData(){
-        requireActivity().runOnUiThread(()->{
-            showLoading();
+//        if(getActivity()!=null){
+//            requireActivity().runOnUiThread(()->{
+                showLoading();
+//
+//            });
+//        }
 
-        });
 
         page=1;
         /* 网络请求 */

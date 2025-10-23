@@ -10,8 +10,16 @@ import android.view.View;
 import android.widget.SeekBar;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.media3.common.Effect;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.transformer.EditedMediaItem;
+import androidx.media3.transformer.Effects;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -19,10 +27,9 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.Player;
+
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sk.iwara.R;
@@ -33,11 +40,14 @@ import com.sk.iwara.base.BaseFragment;
 import com.sk.iwara.databinding.ActivityPlayBinding;
 import com.sk.iwara.payload.VideoDetailPayload;
 import com.sk.iwara.payload.VideoPlayListPayload;
+import com.sk.iwara.util.Anime4KChainEffect;
+import com.sk.iwara.util.Anime4KGlEffect;
 import com.sk.iwara.util.DateUtil;
 import com.sk.iwara.util.HttpUtil;
 import com.sk.iwara.util.PlayerSwipeSeek;
 import com.sk.iwara.util.PlayerUtil;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -90,18 +100,29 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
 
                 updateUI(videoDetailPayload);
                 HttpUtil.get().getAsync(videoDetailPayload.getFileUrl(), null, null,new HttpUtil.NetCallback() {
-                    @Override
+                    @OptIn(markerClass = UnstableApi.class) @Override
                     public void onSuccess(String respBody) {
+                        dismissLoading();
                         getActivity().runOnUiThread(()->{
-                            dismissLoading();
+
                             Type listType = new TypeToken<List<VideoPlayListPayload>>(){}.getType();
                             List<VideoPlayListPayload> videoPlayListPayloads = new Gson().fromJson(respBody, listType);
                             String url = "https:"+videoPlayListPayloads.get(0).getSrc().getView();
                             Log.d("VideoActivity",url);
-                            MediaItem item = MediaItem.fromUri(url);
-                            player.setMediaItem(item);
-                            player.prepare();
-                            player.play();
+//                            MediaItem item = MediaItem.fromUri(url);
+//                            player.setMediaItem(item);
+                            try {
+                                List<Effect> fx = ImmutableList.of(new Anime4KChainEffect(getActivity()));
+                                player.setVideoEffects(fx);          // ← 直接给 List<Effect>
+
+                                MediaItem item = MediaItem.fromUri(url);
+                                player.setMediaItem(item);
+                                player.prepare();
+                                player.play();
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+
                         });
 
 
@@ -200,9 +221,11 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
         });
 
     }
-    @Override
-    protected void initUI() {
+    @OptIn(markerClass = UnstableApi.class) @Override
+    protected void initUI() throws IOException {
         player = PlayerUtil.createCachedPlayer(getActivity());
+
+
         binding.playerView.setPlayer(player);
         new PlayerSwipeSeek().setOnClickListener(this::toggleControl).attach(binding.playerView);
         binding.videoToolsTogglePlay.setOnClickListener(v -> {

@@ -3,7 +3,7 @@ package com.sk.iwara.util;
 import android.annotation.SuppressLint;
 import android.view.MotionEvent;
 
-import com.google.android.exoplayer2.ui.PlayerView;
+
 
 /**
  * Created by 25140 on 2025/10/13 .
@@ -12,7 +12,9 @@ import com.google.android.exoplayer2.ui.PlayerView;
 
 import android.annotation.SuppressLint;
 import android.view.MotionEvent;
-import com.google.android.exoplayer2.ui.PlayerView;
+
+import androidx.media3.ui.PlayerView;
+
 
 public final class PlayerSwipeSeek {
 

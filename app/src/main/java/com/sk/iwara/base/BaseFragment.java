@@ -17,9 +17,11 @@ import androidx.viewbinding.ViewBinding;
 import com.sk.iwara.R;
 import com.sk.iwara.util.LoadingUtil;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 /**
  * 泛型 BaseFragment：
@@ -53,7 +55,13 @@ public abstract class BaseFragment<VB extends ViewBinding> extends Fragment {
         /* 3. 业务入口 */
         init();
         new Thread(this::initData).start();
-        host.runOnUiThread(this::initUI);
+        host.runOnUiThread(()-> {
+            try {
+                initUI();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return binding.getRoot();
     }
 
@@ -82,7 +90,7 @@ public abstract class BaseFragment<VB extends ViewBinding> extends Fragment {
     /* ======== 子类必须实现 ======== */
     protected abstract void init();
     protected abstract void initData();
-    protected abstract void initUI();
+    protected abstract void initUI() throws IOException;
 
     /* ======== 公共 UI 初始化 ======== */
     protected void initCommonUI() {
@@ -110,18 +118,24 @@ public abstract class BaseFragment<VB extends ViewBinding> extends Fragment {
     /* ======== 加载框（简易） ======== */
     private Dialog dialog;
     public void showLoading() {
-        getActivity().runOnUiThread(()->{
-            dialog= LoadingUtil.show(getContext(), R.mipmap.logo,false);
-        });
+        if (getActivity()!=null){
+            requireActivity().runOnUiThread(()->{
+                dialog= LoadingUtil.show(requireContext(), R.mipmap.logo,false);
+            });
+
+        }
 
     }
 
     public void dismissLoading() {
-        getActivity().runOnUiThread(()->{
-            if (dialog != null && dialog.isShowing()) {
-                dialog.dismiss();
-            }
-        });
+        if (getActivity()!=null){
+            getActivity().runOnUiThread(()->{
+                if (dialog != null && dialog.isShowing()) {
+                    dialog.dismiss();
+                }
+            });
+        }
+
 
     }
 

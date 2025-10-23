@@ -2,14 +2,18 @@ package com.sk.iwara.util;
 
 import android.content.Context;
 
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.google.android.exoplayer2.upstream.cache.CacheDataSource;
+
+import androidx.annotation.OptIn;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.datasource.cache.CacheDataSource;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
+
 import com.sk.iwara.App;
 
 public class PlayerUtil {
-    public static ExoPlayer createCachedPlayer(Context ctx) {
+    @OptIn(markerClass = UnstableApi.class) public static ExoPlayer createCachedPlayer(Context ctx) {
         /* 1. 浏览器级 UA & 常用校验头 */
         DefaultHttpDataSource.Factory httpFactory =
                 new DefaultHttpDataSource.Factory()
