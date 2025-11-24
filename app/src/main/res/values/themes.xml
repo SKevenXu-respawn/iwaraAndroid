@@ -37,6 +37,13 @@
         <item name="android:windowFullscreen">false</item>
     </style>
 
-
+    <style name="TransparentBottomSheet" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <!-- 窗口背景透明 -->
+        <item name="android:background">@android:color/transparent</item>
+        <!-- 去掉遮罩 -->
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 
 </resources>

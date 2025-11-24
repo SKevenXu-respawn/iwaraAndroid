@@ -1,10 +1,15 @@
 package com.sk.iwara.base;
 
 import android.app.Dialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -13,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewbinding.ViewBinding;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.navigation.NavigationView;
 import com.sk.iwara.R;
 
@@ -37,6 +43,7 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
     private DrawerLayout drawerRoot;
     private NavigationView navView;
     private ViewGroup realContent;   // 真实内容容器
+    private BottomSheetDialog sheet ;
     /* ========== 生命周期 ========== */
     @Override
     protected final void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,7 +56,7 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
             binding = createBinding();
             setContentView(binding.getRoot());
 
-
+        sheet = new BottomSheetDialog(this,R.style.TransparentBottomSheet);
         /* 2. 初始化通用 UI */
         initCommonUI();
 
@@ -188,5 +195,85 @@ public abstract class BaseActivity<VB extends ViewBinding> extends AppCompatActi
         dismissLoading();
     }
     /* ========== 注入抽屉+悬浮条 ========== */
+    protected void showTextLog(String text) {
 
+
+        sheet.getWindow().setDimAmount(0f);          // 关键
+        sheet.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        // 必须在 setContentView 之前调用
+        sheet.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        View root = LayoutInflater.from(this)
+                .inflate(R.layout.catch_layout, null, false);
+        root.setBackgroundColor(Color.TRANSPARENT);
+        sheet.setContentView(root);
+
+        TextView tvContent = root.findViewById(R.id.catch_text);
+        TextView btnToggle = root.findViewById(R.id.catch_detail_text);
+        TextView closeBtn=root.findViewById(R.id.catch_close);
+        tvContent.setText(text);
+        // 展开/收起逻辑
+        btnToggle.setOnClickListener(v -> {
+            boolean isExpanded = tvContent.getMaxLines() == Integer.MAX_VALUE;
+            if (isExpanded) {
+                tvContent.setMaxLines(2);
+                btnToggle.setText("展开");
+            } else {
+                tvContent.setMaxLines(Integer.MAX_VALUE);
+                btnToggle.setText("收起");
+            }
+        });
+        closeBtn.setOnClickListener(v->{
+            sheet.dismiss();
+        });
+
+        sheet.show();
+    }
+
+
+    protected void showTextLogAutoTime(String text,long time) {
+        BottomSheetDialog sheet = new BottomSheetDialog(this);
+
+        /* 透明背景（你已有） */
+        sheet.getWindow().setDimAmount(0f);
+        sheet.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        sheet.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        View root = LayoutInflater.from(this).inflate(R.layout.catch_layout, null, false);
+        sheet.setContentView(root);
+
+        TextView tvContent = root.findViewById(R.id.catch_text);
+        TextView btnToggle = root.findViewById(R.id.catch_detail_text);
+        TextView closeBtn = root.findViewById(R.id.catch_close);
+
+        tvContent.setText(text);
+
+        /* 展开/收起（你已有） */
+        btnToggle.setOnClickListener(v -> {
+            boolean isExpanded = tvContent.getMaxLines() == Integer.MAX_VALUE;
+            tvContent.setMaxLines(isExpanded ? 2 : Integer.MAX_VALUE);
+            btnToggle.setText(isExpanded ? "展开" : "收起");
+        });
+
+        closeBtn.setOnClickListener(v -> sheet.dismiss());
+
+        sheet.show();
+        if (time<0||time==0){
+            /* 倒计时自动关闭：这里设为 5 秒（5000 ms） */
+            root.postDelayed(() -> {
+                if (sheet.isShowing()) sheet.dismiss();
+            },5000);   // ← 改这里即可调整时长
+        }else{
+            /* 倒计时自动关闭：这里设为 5 秒（5000 ms） */
+            root.postDelayed(() -> {
+                if (sheet.isShowing()) sheet.dismiss();
+            },time);   // ← 改这里即可调整时长
+        }
+
+    }
+    protected void dismissTextLog(){
+        if (sheet!=null){
+            sheet.dismiss();
+        }
+
+    }
 }

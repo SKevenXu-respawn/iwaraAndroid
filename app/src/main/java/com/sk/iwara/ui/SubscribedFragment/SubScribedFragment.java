@@ -80,7 +80,6 @@ public class SubScribedFragment extends BaseFragment<FragmentSubscribedBinding> 
             public void onFailure(Exception e) {
                 if (requireActivity()!=null){
                     requireActivity().runOnUiThread(()->{
-
                         ToastUtil.ToastUtil(e.getMessage(), requireActivity());
                         binding.getRoot().setRefreshing(false);
                     });

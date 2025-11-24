@@ -295,6 +295,7 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
 
             @Override
             public void onFailure(Exception e) {
+                showTextLogAutoTime(e.getLocalizedMessage(),-1);
                 Log.d("HomeFragment", "onFailure: "+e.getMessage());
             }
         });
@@ -328,7 +329,8 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
 
                 if (binding!=null){
                     getActivity().runOnUiThread(()->{
-                        ToastUtil.ToastUtil(e.getMessage(), getActivity());
+                        showTextLogAutoTime(e.getMessage(),-1);
+                        //ToastUtil.ToastUtil(e.getMessage(), getActivity());
                         dismissLoading();
                     });
 
@@ -356,7 +358,7 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
                     @Override
                     public void onFailure(Exception e) {
                         getActivity().runOnUiThread(() -> {
-                            ToastUtil.ToastUtil(e.getMessage(), getActivity());
+                            showTextLogAutoTime(e.getMessage(),-1);
                             isLoading = false;
                             page--;          // 失败回退页码
                         });
@@ -386,7 +388,7 @@ HomeFragment extends BaseFragment<FragmentHomeBinding> {
             public void onFailure(Exception e) {
                 Log.d("TAG", "tag 搜索失败: " + e.getMessage());
                 getActivity().runOnUiThread(() -> {
-                    ToastUtil.ToastUtil(e.getMessage(), getActivity());
+                    showTextLogAutoTime(e.getMessage(), -1);
                     isLoading = false;
                     page--;          // 失败回退页码
                 });

@@ -47,6 +47,7 @@ public class SuggestFragment extends BaseFragment<FragmentSuggestBinding> {
                     @Override
                     public void onFailure(Exception e) {
                         Log.e("SuggestFragment",e.getMessage());
+                        showTextLog(e.getLocalizedMessage());
                     }
                 });
             });

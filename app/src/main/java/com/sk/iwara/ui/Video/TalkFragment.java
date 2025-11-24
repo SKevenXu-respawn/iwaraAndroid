@@ -47,6 +47,7 @@ public class TalkFragment extends BaseFragment<FragmentTalkBinding> {
                     @Override
                     public void onFailure(Exception e) {
                         Log.e("SuggestFragment",e.getMessage());
+                        showTextLog(e.getLocalizedMessage());
                     }
                 });
             });

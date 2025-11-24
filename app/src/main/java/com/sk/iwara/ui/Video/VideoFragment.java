@@ -13,13 +13,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.OptIn;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.media3.common.Effect;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
-import androidx.media3.transformer.EditedMediaItem;
-import androidx.media3.transformer.Effects;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -29,19 +26,15 @@ import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sk.iwara.R;
 import com.sk.iwara.adapter.VideoTagAdapter;
 import com.sk.iwara.api.IWARA_API;
-import com.sk.iwara.base.BaseActivity;
 import com.sk.iwara.base.BaseFragment;
 import com.sk.iwara.databinding.ActivityPlayBinding;
 import com.sk.iwara.payload.VideoDetailPayload;
 import com.sk.iwara.payload.VideoPlayListPayload;
-import com.sk.iwara.util.Anime4KChainEffect;
-import com.sk.iwara.util.Anime4KGlEffect;
 import com.sk.iwara.util.DateUtil;
 import com.sk.iwara.util.HttpUtil;
 import com.sk.iwara.util.PlayerSwipeSeek;
@@ -89,6 +82,7 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
             return;
         }
         id= getArguments().getString("id");
+
         Log.d("VideoActivity",id);
         showLoading();
         HttpUtil.get().getAsync(IWARA_API.VIDEO+"/video/"+id, null,null, new HttpUtil.NetCallback() {
@@ -112,15 +106,15 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
 //                            MediaItem item = MediaItem.fromUri(url);
 //                            player.setMediaItem(item);
                             try {
-                                List<Effect> fx = ImmutableList.of(new Anime4KChainEffect(getActivity()));
-                                player.setVideoEffects(fx);          // ← 直接给 List<Effect>
+//                                List<Effect> fx = ImmutableList.of(new VideoChainEffect(C.TRACK_TYPE_AUDIO));
+//                                player.setVideoEffects(fx);          // ← 直接给 List<Effect>
 
                                 MediaItem item = MediaItem.fromUri(url);
                                 player.setMediaItem(item);
                                 player.prepare();
                                 player.play();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
+                            } catch (Exception e) {
+                                showTextLog(e.getLocalizedMessage());
                             }
 
                         });
@@ -131,6 +125,7 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
                     @Override
                     public void onFailure(Exception e) {
                         dismissLoading();
+                        showTextLog(e.getLocalizedMessage());
                         Log.d("VideoActivity",e.toString());
                     }
                 });
@@ -139,6 +134,7 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
             @Override
             public void onFailure(Exception e) {
                 dismissLoading();
+                showTextLog(e.getLocalizedMessage());
                 Log.d("VideoActivity",e.toString());
             }
         });
@@ -166,7 +162,7 @@ public class VideoFragment extends BaseFragment<ActivityPlayBinding> {
             VideoPagerAdapter adapter = new VideoPagerAdapter(getActivity());
             binding.viewPager.setAdapter(adapter);
 
-            ArrayList tags=  getArguments().getStringArrayList("tags");
+            ArrayList<String> tags=  getArguments().getStringArrayList("tags");
             TagAdapter=new VideoTagAdapter(tags);
             binding.videoDetailTags.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false));
             binding.videoDetailTags.setAdapter(TagAdapter);
